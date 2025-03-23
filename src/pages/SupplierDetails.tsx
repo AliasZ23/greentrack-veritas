@@ -1,292 +1,374 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Calendar, FileText, Award, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
-import { suppliers } from '@/utils/mockData';
-import Header from '@/components/Header';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { ArrowLeft, Calendar, Clock, FileCheck, Shield, User } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import Header from '@/components/Header';
 import SustainabilityScore from '@/components/SustainabilityScore';
 import VerificationBadge from '@/components/VerificationBadge';
 import TransitionComponent from '@/components/TransitionComponent';
+import { suppliers, verificationActivities } from '@/utils/mockData';
 
 const SupplierDetails = () => {
-  const { id } = useParams();
-  const [supplier, setSupplier] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
+  const { id } = useParams<{ id: string }>();
+  const [supplier, setSupplier] = useState(suppliers.find(s => s.id === id));
+  
   useEffect(() => {
-    // Simulate API call
-    const timer = setTimeout(() => {
-      const found = suppliers.find(s => s.id === parseInt(id || '0'));
-      setSupplier(found || null);
-      setLoading(false);
-    }, 800);
-
-    return () => clearTimeout(timer);
+    if (id) {
+      const foundSupplier = suppliers.find(s => s.id === id);
+      setSupplier(foundSupplier);
+    }
   }, [id]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 md:px-6 pt-24 pb-16">
-          <div className="animate-pulse flex flex-col gap-4">
-            <div className="h-8 bg-muted rounded w-1/4"></div>
-            <div className="h-64 bg-muted rounded"></div>
-            <div className="h-32 bg-muted rounded"></div>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
+  
   if (!supplier) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <main className="container mx-auto px-4 md:px-6 pt-24 pb-16">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Supplier Not Found</h2>
-            <p className="mb-6 text-muted-foreground">The supplier you're looking for doesn't exist or may have been removed.</p>
-            <Button asChild>
-              <Link to="/">Return to Dashboard</Link>
+          <div className="flex flex-col items-center justify-center h-[60vh]">
+            <h2 className="text-2xl font-bold">Supplier not found</h2>
+            <p className="text-muted-foreground mt-2">The supplier you're looking for doesn't exist or has been removed.</p>
+            <Button asChild className="mt-6">
+              <Link to="/">Back to Dashboard</Link>
             </Button>
           </div>
         </main>
       </div>
     );
   }
-
-  const tierBadgeClasses = {
-    primary: 'bg-ocean-blue-100 text-ocean-blue-800 border-ocean-blue-200',
-    secondary: 'bg-purple-100 text-purple-800 border-purple-200',
-    tertiary: 'bg-warm-gray-100 text-warm-gray-800 border-warm-gray-200',
-  };
-
+  
+  const supplierActivities = verificationActivities.filter(activity => 
+    activity.supplier === supplier.name
+  );
+  
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 md:px-6 pt-24 pb-16">
-        <TransitionComponent animation="fade" className="mb-6 flex items-center">
-          <Button variant="outline" size="sm" className="mr-4" asChild>
-            <Link to="/"><ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard</Link>
-          </Button>
-          <h1 className="text-2xl md:text-3xl font-bold">{supplier.name}</h1>
-          <VerificationBadge status={supplier.verificationStatus} className="ml-3" />
+        <TransitionComponent animation="fade-in" delay={50}>
+          <div className="mb-6">
+            <Link to="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Dashboard
+            </Link>
+            
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold">{supplier.name}</h1>
+                <div className="flex items-center mt-2 text-muted-foreground">
+                  <Badge variant="outline" className="mr-2">Tier {supplier.tier === 'primary' ? '1' : supplier.tier === 'secondary' ? '2' : '3'}</Badge>
+                  <span className="text-sm">{supplier.location}</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <Card className="border-0 shadow-none bg-transparent">
+                  <CardContent className="p-0">
+                    <SustainabilityScore score={supplier.sustainabilityScore} size="lg" />
+                  </CardContent>
+                </Card>
+                
+                <VerificationBadge status={supplier.verificationStatus} />
+              </div>
+            </div>
+          </div>
         </TransitionComponent>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <TransitionComponent animation="fade-up" delay={100} className="md:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex justify-between items-center">
-                  <span>Supplier Overview</span>
-                  <SustainabilityScore score={supplier.sustainabilityScore} size="md" showLabel={true} />
-                </CardTitle>
-                <CardDescription>
-                  Key information and sustainability metrics
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-2">Basic Information</h3>
-                    <dl className="space-y-2">
-                      <div className="flex justify-between">
-                        <dt className="text-sm font-medium">Category</dt>
-                        <dd className="text-sm">{supplier.category}</dd>
-                      </div>
-                      <div className="flex justify-between">
-                        <dt className="text-sm font-medium">Location</dt>
-                        <dd className="text-sm flex items-center"><MapPin className="h-3 w-3 mr-1" />{supplier.location}</dd>
-                      </div>
-                      <div className="flex justify-between">
-                        <dt className="text-sm font-medium">Tier</dt>
-                        <dd>
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${tierBadgeClasses[supplier.tier]}`}>
-                            {supplier.tier.charAt(0).toUpperCase() + supplier.tier.slice(1)}
-                          </span>
-                        </dd>
-                      </div>
-                      <div className="flex justify-between">
-                        <dt className="text-sm font-medium">Last Verified</dt>
-                        <dd className="text-sm flex items-center">
-                          <Calendar className="h-3 w-3 mr-1" />
-                          {new Date(supplier.lastVerified).toLocaleDateString()}
-                        </dd>
-                      </div>
-                    </dl>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-2">Sustainability Metrics</h3>
-                    <div className="space-y-4">
+        
+        <Tabs defaultValue="overview" className="mt-6">
+          <TabsList className="grid w-full grid-cols-3 md:w-auto md:inline-flex">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="verifications">Verification History</TabsTrigger>
+            <TabsTrigger value="certifications">Certifications</TabsTrigger>
+          </TabsList>
+          
+          <TransitionComponent animation="fade-up" delay={150}>
+            <TabsContent value="overview" className="mt-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center">
+                      <User className="h-5 w-5 mr-2 text-primary" />
+                      Contact Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
                       <div>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-sm font-medium">Carbon Emissions</span>
-                          <span className="text-sm">{supplier.metrics?.carbonEmissions} tons/year</span>
-                        </div>
-                        <div className="w-full bg-muted rounded-full h-2">
-                          <div 
-                            className="bg-green-500 h-2 rounded-full"
-                            style={{ width: `${Math.min(100, (1 - supplier.metrics?.carbonEmissions / 10000) * 100)}%` }}
-                          ></div>
-                        </div>
+                        <p className="text-sm font-medium">Primary Contact</p>
+                        <p className="text-sm text-muted-foreground">Sarah Johnson</p>
                       </div>
                       <div>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-sm font-medium">Water Usage</span>
-                          <span className="text-sm">{supplier.metrics?.waterUsage} kL/year</span>
-                        </div>
-                        <div className="w-full bg-muted rounded-full h-2">
-                          <div 
-                            className="bg-blue-500 h-2 rounded-full"
-                            style={{ width: `${Math.min(100, (1 - supplier.metrics?.waterUsage / 50000) * 100)}%` }}
-                          ></div>
-                        </div>
+                        <p className="text-sm font-medium">Email</p>
+                        <p className="text-sm text-muted-foreground">contact@{supplier.name.toLowerCase().replace(/\s+/g, '')}.com</p>
                       </div>
                       <div>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-sm font-medium">Waste Generated</span>
-                          <span className="text-sm">{supplier.metrics?.wasteGenerated} tons/year</span>
+                        <p className="text-sm font-medium">Phone</p>
+                        <p className="text-sm text-muted-foreground">+1 (555) 123-4567</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center">
+                      <Shield className="h-5 w-5 mr-2 text-primary" />
+                      Compliance Status
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div>
+                        <p className="text-sm font-medium">Last Audit Date</p>
+                        <p className="text-sm text-muted-foreground">{supplier.lastVerified}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Audit Result</p>
+                        <p className="text-sm text-muted-foreground">
+                          {supplier.verificationStatus === 'verified' ? 'Passed' : 
+                           supplier.verificationStatus === 'pending' ? 'In Review' : 'Needs Attention'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Next Scheduled Audit</p>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(new Date(supplier.lastVerified).setMonth(new Date(supplier.lastVerified).getMonth() + 12)).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center">
+                      <FileCheck className="h-5 w-5 mr-2 text-primary" />
+                      Category Performance
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Environmental</span>
+                          <span className="font-medium">{supplier.sustainabilityScore - 5}%</span>
                         </div>
-                        <div className="w-full bg-muted rounded-full h-2">
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
                           <div 
-                            className="bg-amber-500 h-2 rounded-full"
-                            style={{ width: `${Math.min(100, (1 - supplier.metrics?.wasteGenerated / 5000) * 100)}%` }}
-                          ></div>
+                            className="h-full bg-primary rounded-full" 
+                            style={{ width: `${supplier.sustainabilityScore - 5}%` }}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Social</span>
+                          <span className="font-medium">{supplier.sustainabilityScore + 2}%</span>
+                        </div>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-primary rounded-full" 
+                            style={{ width: `${supplier.sustainabilityScore + 2}%` }}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Governance</span>
+                          <span className="font-medium">{supplier.sustainabilityScore - 2}%</span>
+                        </div>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-primary rounded-full" 
+                            style={{ width: `${supplier.sustainabilityScore - 2}%` }}
+                          />
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TransitionComponent>
+                  </CardContent>
+                </Card>
+              </div>
 
-          <TransitionComponent animation="fade-up" delay={200}>
-            <Card>
-              <CardHeader>
-                <CardTitle>Certifications</CardTitle>
-                <CardDescription>
-                  Valid sustainability certifications
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {supplier.certifications.map((cert: string, i: number) => (
-                    <div key={i} className="flex items-center p-2 border rounded-md bg-card">
-                      <Award className="h-4 w-4 mr-2 text-primary" />
-                      <span className="text-sm">{cert}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Supplier Overview</CardTitle>
+                  <CardDescription>
+                    Key information about {supplier.name}'s sustainability practices
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="prose prose-sm max-w-none dark:prose-invert">
+                  <p>
+                    {supplier.name} is a {supplier.tier} tier supplier specializing in {supplier.category.toLowerCase()}. 
+                    They have consistently demonstrated strong commitment to sustainability practices, 
+                    achieving a sustainability score of {supplier.sustainabilityScore}/100.
+                  </p>
+                  <p>
+                    Based in {supplier.location}, they have been a certified partner since 
+                    {new Date().getFullYear() - Math.floor(Math.random() * 5 + 3)}. Their operations are 
+                    aligned with our sustainability goals, particularly in reducing carbon emissions and 
+                    implementing ethical labor practices.
+                  </p>
+                  <p>
+                    Recent improvements include investments in renewable energy, waste reduction initiatives, 
+                    and enhanced supply chain transparency measures. {supplier.name} continues to be a 
+                    valuable partner in our sustainable supply chain network.
+                  </p>
+                </CardContent>
+              </Card>
+            </TabsContent>
           </TransitionComponent>
           
-          <TransitionComponent animation="fade-up" delay={300} className="md:col-span-3">
-            <Card>
-              <CardHeader>
-                <CardTitle>Verification History</CardTitle>
-                <CardDescription>
-                  Timeline of verification activities and audits
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="all">
-                  <TabsList className="mb-4">
-                    <TabsTrigger value="all">All Activities</TabsTrigger>
-                    <TabsTrigger value="audits">Audits</TabsTrigger>
-                    <TabsTrigger value="documents">Documents</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="all">
-                    <div className="space-y-4">
-                      {Array(5).fill(0).map((_, i) => {
-                        const types = ['Audit', 'Document Upload', 'Review', 'Certification'];
-                        const type = types[Math.floor(Math.random() * types.length)];
-                        const date = new Date();
-                        date.setMonth(date.getMonth() - i);
-                        
-                        return (
-                          <div key={i} className="flex items-start gap-4 p-3 border-b last:border-0">
-                            {type === 'Audit' && <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />}
-                            {type === 'Document Upload' && <FileText className="h-5 w-5 text-blue-500 mt-0.5" />}
-                            {type === 'Review' && <Clock className="h-5 w-5 text-amber-500 mt-0.5" />}
-                            {type === 'Certification' && <Award className="h-5 w-5 text-purple-500 mt-0.5" />}
-                            
-                            <div className="flex-1">
-                              <div className="flex justify-between">
-                                <h4 className="text-sm font-medium">{type}</h4>
-                                <time className="text-xs text-muted-foreground">{date.toLocaleDateString()}</time>
+          <TransitionComponent animation="fade-up" delay={150}>
+            <TabsContent value="verifications" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Verification History</CardTitle>
+                  <CardDescription>
+                    Record of all audits, certifications, and compliance checks
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {supplierActivities.length > 0 ? (
+                    <div className="space-y-6">
+                      {supplierActivities.map((activity) => (
+                        <div key={activity.id} className="flex items-start space-x-4">
+                          <div className="mt-1">
+                            {activity.type === 'audit' && (
+                              <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                                <Shield className="h-5 w-5 text-blue-600 dark:text-blue-300" />
                               </div>
-                              <p className="text-sm mt-1">
-                                {type === 'Audit' && 'On-site sustainability audit completed'}
-                                {type === 'Document Upload' && 'Supplier uploaded water usage reports'}
-                                {type === 'Review' && 'Third-party review of carbon emissions data'}
-                                {type === 'Certification' && 'Received ISO 14001 Environmental Certification'}
-                              </p>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="audits">
-                    <div className="space-y-4">
-                      {Array(3).fill(0).map((_, i) => {
-                        const date = new Date();
-                        date.setMonth(date.getMonth() - i * 2);
-                        
-                        return (
-                          <div key={i} className="flex items-start gap-4 p-3 border-b last:border-0">
-                            <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
-                            <div className="flex-1">
-                              <div className="flex justify-between">
-                                <h4 className="text-sm font-medium">On-site Audit</h4>
-                                <time className="text-xs text-muted-foreground">{date.toLocaleDateString()}</time>
+                            )}
+                            {activity.type === 'certification' && (
+                              <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                                <FileCheck className="h-5 w-5 text-green-600 dark:text-green-300" />
                               </div>
-                              <p className="text-sm mt-1">Comprehensive sustainability audit by third-party verifier</p>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="documents">
-                    <div className="space-y-4">
-                      {Array(4).fill(0).map((_, i) => {
-                        const types = ['Environmental Report', 'Certification Document', 'Water Usage Data', 'Energy Consumption Report'];
-                        const type = types[i % types.length];
-                        const date = new Date();
-                        date.setMonth(date.getMonth() - i);
-                        
-                        return (
-                          <div key={i} className="flex items-start gap-4 p-3 border-b last:border-0">
-                            <FileText className="h-5 w-5 text-blue-500 mt-0.5" />
-                            <div className="flex-1">
-                              <div className="flex justify-between">
-                                <h4 className="text-sm font-medium">{type}</h4>
-                                <time className="text-xs text-muted-foreground">{date.toLocaleDateString()}</time>
+                            )}
+                            {activity.type === 'report' && (
+                              <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900 flex items-center justify-center">
+                                <Clock className="h-5 w-5 text-amber-600 dark:text-amber-300" />
                               </div>
-                              <p className="text-sm mt-1">Document uploaded and verified by system</p>
-                              <Button variant="ghost" size="sm" className="mt-2">Download</Button>
-                            </div>
+                            )}
+                            {activity.type === 'update' && (
+                              <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                                <Calendar className="h-5 w-5 text-purple-600 dark:text-purple-300" />
+                              </div>
+                            )}
                           </div>
-                        )
-                      })}
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-base font-medium">{activity.activity}</h4>
+                              <Badge variant={
+                                activity.status === 'completed' ? 'default' : 
+                                activity.status === 'in-progress' ? 'outline' : 'secondary'
+                              }>
+                                {activity.status}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-1">Date: {activity.date}</p>
+                            <p className="text-sm mt-2">
+                              {activity.status === 'completed' 
+                                ? 'Verification completed successfully. All requirements met.' 
+                                : activity.status === 'in-progress'
+                                ? 'Verification in progress. Awaiting final documentation.'
+                                : 'Scheduled for future verification. No action required at this time.'}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="ml-auto">View Full History</Button>
-              </CardFooter>
-            </Card>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">No verification activities found for this supplier.</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
           </TransitionComponent>
-        </div>
+          
+          <TransitionComponent animation="fade-up" delay={150}>
+            <TabsContent value="certifications" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Certifications</CardTitle>
+                  <CardDescription>
+                    Sustainability and compliance certifications held by {supplier.name}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {supplier.certifications.map((cert, index) => (
+                      <Card key={index} className="border border-border">
+                        <CardContent className="p-4">
+                          <div className="flex items-start space-x-4">
+                            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                              <FileCheck className="h-6 w-6 text-primary" />
+                            </div>
+                            <div>
+                              <h4 className="text-base font-medium">{cert}</h4>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                Verified: {new Date(supplier.lastVerified).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric'
+                                })}
+                              </p>
+                              <p className="text-xs mt-2">Renewal in {Math.floor(Math.random() * 11 + 1)} months</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                  
+                  {supplier.certifications.length < 3 && (
+                    <div className="mt-6">
+                      <Separator className="mb-6" />
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-base font-medium">Recommended Certifications</h4>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Additional certifications that would benefit this supplier
+                          </p>
+                        </div>
+                        <Button variant="outline" size="sm">Suggest to Supplier</Button>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <Card className="border border-dashed">
+                          <CardContent className="p-4">
+                            <h4 className="text-base font-medium">ISO 14001</h4>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Environmental Management System certification
+                            </p>
+                          </CardContent>
+                        </Card>
+                        <Card className="border border-dashed">
+                          <CardContent className="p-4">
+                            <h4 className="text-base font-medium">SA8000</h4>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Social Accountability certification for ethical working conditions
+                            </p>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </TransitionComponent>
+        </Tabs>
       </main>
     </div>
   );

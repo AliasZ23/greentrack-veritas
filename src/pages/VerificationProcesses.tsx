@@ -1,539 +1,374 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle, Clock, AlertTriangle, FileCheck, Filter, Search } from 'lucide-react';
-import Header from '@/components/Header';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  CalendarRange,
+  CheckCircle2,
+  Clock,
+  FileText,
+  Filter,
+  Plus,
+  RefreshCw,
+  Search,
+  Shield,
+  XCircle
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import Header from '@/components/Header';
 import TransitionComponent from '@/components/TransitionComponent';
+import { verificationActivities, suppliers } from '@/utils/mockData';
 
-// Mock verification requests
-const verificationRequests = [
-  {
-    id: 1,
-    supplierName: 'EcoFabrics Inc.',
-    documentType: 'Carbon Emissions Report',
-    submittedDate: '2023-10-15',
-    status: 'approved',
-    reviewer: 'John Smith',
-    notes: 'All documentation meets our standards.',
-  },
-  {
-    id: 2,
-    supplierName: 'Green Logistics Ltd.',
-    documentType: 'Water Usage Certification',
-    submittedDate: '2023-10-14',
-    status: 'pending',
-    reviewer: 'Pending Assignment',
-    notes: '',
-  },
-  {
-    id: 3,
-    supplierName: 'Sustainable Packaging Co.',
-    documentType: 'Ethical Labor Audit',
-    submittedDate: '2023-10-10',
-    status: 'rejected',
-    reviewer: 'Emma Johnson',
-    notes: 'Missing required documentation on worker interviews.',
-  },
-  {
-    id: 4,
-    supplierName: 'Clean Energy Solutions',
-    documentType: 'Renewable Energy Certificate',
-    submittedDate: '2023-10-08',
-    status: 'approved',
-    reviewer: 'Michael Chen',
-    notes: 'Verified with third-party auditor.',
-  },
-  {
-    id: 5,
-    supplierName: 'Organic Materials Inc.',
-    documentType: 'Material Sourcing Documentation',
-    submittedDate: '2023-10-05',
-    status: 'pending',
-    reviewer: 'Pending Assignment',
-    notes: '',
-  },
-  {
-    id: 6,
-    supplierName: 'Ethical Apparel Makers',
-    documentType: 'Factory Conditions Report',
-    submittedDate: '2023-10-01',
-    status: 'approved',
-    reviewer: 'Sarah Williams',
-    notes: 'Meets all ethical standards.',
-  },
-  {
-    id: 7,
-    supplierName: 'Bio Plastics Ltd.',
-    documentType: 'Biodegradability Test Results',
-    submittedDate: '2023-09-28',
-    status: 'pending',
-    reviewer: 'David Lopez',
-    notes: 'Awaiting additional lab results.',
-  },
-];
+const statusColors = {
+  'completed': 'text-green-500 bg-green-100 dark:bg-green-900/40 dark:text-green-300',
+  'in-progress': 'text-amber-500 bg-amber-100 dark:bg-amber-900/40 dark:text-amber-300',
+  'scheduled': 'text-blue-500 bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300',
+};
 
 const VerificationProcesses = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [filterType, setFilterType] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
   
-  const filteredRequests = verificationRequests.filter(request => {
-    const matchesSearch = !searchTerm || 
-      request.supplierName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.documentType.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredActivities = verificationActivities.filter(activity => {
+    const matchesSearch = 
+      activity.supplier.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      activity.activity.toLowerCase().includes(searchTerm.toLowerCase());
       
-    const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
+    const matchesType = filterType === 'all' || activity.type === filterType;
+    const matchesStatus = filterStatus === 'all' || activity.status === filterStatus;
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesType && matchesStatus;
   });
-
-  const getStatusBadge = (status: string) => {
-    if (status === 'approved') {
-      return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Approved</Badge>;
-    } else if (status === 'pending') {
-      return <Badge variant="outline" className="bg-amber-100 text-amber-800 hover:bg-amber-100">Pending</Badge>;
-    } else {
-      return <Badge variant="destructive">Rejected</Badge>;
-    }
+  
+  const activityCounts = {
+    completed: verificationActivities.filter(a => a.status === 'completed').length,
+    inProgress: verificationActivities.filter(a => a.status === 'in-progress').length,
+    scheduled: verificationActivities.filter(a => a.status === 'scheduled').length,
   };
-
-  const getStatusIcon = (status: string) => {
-    if (status === 'approved') {
-      return <CheckCircle className="h-5 w-5 text-green-500" />;
-    } else if (status === 'pending') {
-      return <Clock className="h-5 w-5 text-amber-500" />;
-    } else {
-      return <AlertTriangle className="h-5 w-5 text-red-500" />;
-    }
-  };
-
+  
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 md:px-6 pt-24 pb-16">
-        <TransitionComponent animation="fade" className="mb-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+        <TransitionComponent animation="fade-in" className="mb-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold mb-2">Verification Processes</h1>
-              <p className="text-muted-foreground">Track and manage verification requests from suppliers</p>
+              <p className="text-muted-foreground">Track and manage all verification activities across your supply chain</p>
             </div>
-            <div className="mt-4 md:mt-0">
-              <Button>
-                <FileCheck className="mr-2 h-4 w-4" />
-                New Verification
+            <div className="flex space-x-2">
+              <Button variant="outline" className="gap-1">
+                <RefreshCw className="h-4 w-4" />
+                <span className="hidden sm:inline">Refresh</span>
+              </Button>
+              <Button className="gap-1">
+                <Plus className="h-4 w-4" />
+                <span>New Verification</span>
               </Button>
             </div>
           </div>
         </TransitionComponent>
-
-        <TransitionComponent animation="fade-up" delay={100}>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 mb-8">
           <Card>
-            <CardHeader>
-              <CardTitle>Verification Queue</CardTitle>
-              <CardDescription>
-                Review and process verification requests from suppliers
-              </CardDescription>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-medium flex items-center">
+                <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
+                Completed
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="all">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
-                  <TabsList>
-                    <TabsTrigger value="all">All Requests</TabsTrigger>
-                    <TabsTrigger value="pending">Pending</TabsTrigger>
-                    <TabsTrigger value="approved">Approved</TabsTrigger>
-                    <TabsTrigger value="rejected">Rejected</TabsTrigger>
-                  </TabsList>
-                  
-                  <div className="flex w-full md:w-auto gap-2">
-                    <div className="relative w-full md:w-64">
-                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        placeholder="Search requests..." 
-                        className="pl-8"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
-                    </div>
-                    
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon">
-                          <Filter className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuGroup>
-                          <DropdownMenuItem onClick={() => setStatusFilter('all')}>
-                            All Statuses
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setStatusFilter('approved')}>
-                            <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                            Approved
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setStatusFilter('pending')}>
-                            <Clock className="mr-2 h-4 w-4 text-amber-500" />
-                            Pending
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setStatusFilter('rejected')}>
-                            <AlertTriangle className="mr-2 h-4 w-4 text-red-500" />
-                            Rejected
-                          </DropdownMenuItem>
-                        </DropdownMenuGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-                
-                <TabsContent value="all" className="space-y-4">
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[100px]">Status</TableHead>
-                          <TableHead>Supplier</TableHead>
-                          <TableHead>Document Type</TableHead>
-                          <TableHead>Submitted</TableHead>
-                          <TableHead>Reviewer</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredRequests.map((request) => (
-                          <TableRow key={request.id}>
-                            <TableCell>
-                              <div className="flex items-center">
-                                {getStatusIcon(request.status)}
-                                <span className="sr-only">{request.status}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              <Link to={`/supplier/${request.id}`} className="hover:underline">
-                                {request.supplierName}
-                              </Link>
-                            </TableCell>
-                            <TableCell>{request.documentType}</TableCell>
-                            <TableCell>{new Date(request.submittedDate).toLocaleDateString()}</TableCell>
-                            <TableCell>{request.reviewer}</TableCell>
-                            <TableCell className="text-right">
-                              <Button variant="ghost" size="sm">
-                                View Details
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        {filteredRequests.length === 0 && (
-                          <TableRow>
-                            <TableCell colSpan={6} className="text-center h-24">
-                              <div className="flex flex-col items-center justify-center">
-                                <Search className="h-8 w-8 text-muted-foreground mb-2" />
-                                <p className="text-muted-foreground">No verification requests found</p>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="pending">
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[100px]">Status</TableHead>
-                          <TableHead>Supplier</TableHead>
-                          <TableHead>Document Type</TableHead>
-                          <TableHead>Submitted</TableHead>
-                          <TableHead>Reviewer</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {verificationRequests
-                          .filter(request => request.status === 'pending')
-                          .map((request) => (
-                            <TableRow key={request.id}>
-                              <TableCell>
-                                <div className="flex items-center">
-                                  <Clock className="h-5 w-5 text-amber-500" />
-                                </div>
-                              </TableCell>
-                              <TableCell className="font-medium">
-                                <Link to={`/supplier/${request.id}`} className="hover:underline">
-                                  {request.supplierName}
-                                </Link>
-                              </TableCell>
-                              <TableCell>{request.documentType}</TableCell>
-                              <TableCell>{new Date(request.submittedDate).toLocaleDateString()}</TableCell>
-                              <TableCell>{request.reviewer}</TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex justify-end gap-2">
-                                  <Button variant="outline" size="sm">
-                                    Assign
-                                  </Button>
-                                  <Button variant="ghost" size="sm">
-                                    View
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="approved">
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[100px]">Status</TableHead>
-                          <TableHead>Supplier</TableHead>
-                          <TableHead>Document Type</TableHead>
-                          <TableHead>Submitted</TableHead>
-                          <TableHead>Reviewer</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {verificationRequests
-                          .filter(request => request.status === 'approved')
-                          .map((request) => (
-                            <TableRow key={request.id}>
-                              <TableCell>
-                                <div className="flex items-center">
-                                  <CheckCircle className="h-5 w-5 text-green-500" />
-                                </div>
-                              </TableCell>
-                              <TableCell className="font-medium">
-                                <Link to={`/supplier/${request.id}`} className="hover:underline">
-                                  {request.supplierName}
-                                </Link>
-                              </TableCell>
-                              <TableCell>{request.documentType}</TableCell>
-                              <TableCell>{new Date(request.submittedDate).toLocaleDateString()}</TableCell>
-                              <TableCell>{request.reviewer}</TableCell>
-                              <TableCell className="text-right">
-                                <Button variant="ghost" size="sm">
-                                  View Details
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="rejected">
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[100px]">Status</TableHead>
-                          <TableHead>Supplier</TableHead>
-                          <TableHead>Document Type</TableHead>
-                          <TableHead>Submitted</TableHead>
-                          <TableHead>Reviewer</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {verificationRequests
-                          .filter(request => request.status === 'rejected')
-                          .map((request) => (
-                            <TableRow key={request.id}>
-                              <TableCell>
-                                <div className="flex items-center">
-                                  <AlertTriangle className="h-5 w-5 text-red-500" />
-                                </div>
-                              </TableCell>
-                              <TableCell className="font-medium">
-                                <Link to={`/supplier/${request.id}`} className="hover:underline">
-                                  {request.supplierName}
-                                </Link>
-                              </TableCell>
-                              <TableCell>{request.documentType}</TableCell>
-                              <TableCell>{new Date(request.submittedDate).toLocaleDateString()}</TableCell>
-                              <TableCell>{request.reviewer}</TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex justify-end gap-2">
-                                  <Button variant="outline" size="sm">
-                                    Request Revision
-                                  </Button>
-                                  <Button variant="ghost" size="sm">
-                                    View
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </TabsContent>
-              </Tabs>
+              <div className="text-3xl font-bold">{activityCounts.completed}</div>
+              <p className="text-sm text-muted-foreground">Verifications finalized</p>
             </CardContent>
           </Card>
-        </TransitionComponent>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          <TransitionComponent animation="fade-up" delay={200}>
-            <Card>
-              <CardHeader>
-                <CardTitle>Verification Steps</CardTitle>
-                <CardDescription>Standard process for verifying supplier claims</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ol className="space-y-4">
-                  <li className="flex gap-4">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full border bg-background">
-                      <span className="text-sm font-medium">1</span>
-                    </div>
-                    <div>
-                      <h3 className="font-medium">Document Submission</h3>
-                      <p className="text-sm text-muted-foreground">Suppliers submit required documentation</p>
-                    </div>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full border bg-background">
-                      <span className="text-sm font-medium">2</span>
-                    </div>
-                    <div>
-                      <h3 className="font-medium">Initial Screening</h3>
-                      <p className="text-sm text-muted-foreground">Documents checked for completeness</p>
-                    </div>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full border bg-background">
-                      <span className="text-sm font-medium">3</span>
-                    </div>
-                    <div>
-                      <h3 className="font-medium">Detailed Review</h3>
-                      <p className="text-sm text-muted-foreground">Verification specialists analyze claims</p>
-                    </div>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full border bg-background">
-                      <span className="text-sm font-medium">4</span>
-                    </div>
-                    <div>
-                      <h3 className="font-medium">On-site Audit (if required)</h3>
-                      <p className="text-sm text-muted-foreground">Physical inspection of facilities</p>
-                    </div>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full border bg-background">
-                      <span className="text-sm font-medium">5</span>
-                    </div>
-                    <div>
-                      <h3 className="font-medium">Final Verification</h3>
-                      <p className="text-sm text-muted-foreground">Approval or rejection with feedback</p>
-                    </div>
-                  </li>
-                </ol>
-              </CardContent>
-            </Card>
-          </TransitionComponent>
-
-          <TransitionComponent animation="fade-up" delay={300}>
-            <Card>
-              <CardHeader>
-                <CardTitle>Verification Statistics</CardTitle>
-                <CardDescription>Overview of processing metrics</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 gap-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Total Requests</p>
-                      <p className="text-2xl font-bold">{verificationRequests.length}</p>
-                    </div>
-                    <div className="flex gap-3">
-                      <div className="text-center">
-                        <div className="flex items-center gap-1">
-                          <div className="h-3 w-3 rounded-full bg-green-500"></div>
-                          <span className="text-sm font-medium">
-                            {verificationRequests.filter(r => r.status === 'approved').length}
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">Approved</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="flex items-center gap-1">
-                          <div className="h-3 w-3 rounded-full bg-amber-500"></div>
-                          <span className="text-sm font-medium">
-                            {verificationRequests.filter(r => r.status === 'pending').length}
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">Pending</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="flex items-center gap-1">
-                          <div className="h-3 w-3 rounded-full bg-red-500"></div>
-                          <span className="text-sm font-medium">
-                            {verificationRequests.filter(r => r.status === 'rejected').length}
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">Rejected</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-2">Processing Time (Avg.)</p>
-                    <div className="h-8 w-full rounded-full bg-muted overflow-hidden">
-                      <div 
-                        className="h-full bg-blue-500 flex items-center justify-end px-3"
-                        style={{ width: '65%' }}
-                      >
-                        <span className="text-xs font-medium text-white">3.2 days</span>
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1 text-right">Target: 5 days</p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-1">Recent Activity</p>
-                    <div className="space-y-2">
-                      {[1, 2, 3].map(i => (
-                        <div key={i} className="flex items-center text-sm">
-                          <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>
-                          <span>
-                            {i === 1 ? 'New water usage report verified' : 
-                             i === 2 ? 'Carbon audit requested for EcoFabrics' : 
-                                       'Labor practices documentation rejected'}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TransitionComponent>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-medium flex items-center">
+                <Clock className="h-4 w-4 mr-2 text-amber-500" />
+                In Progress
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{activityCounts.inProgress}</div>
+              <p className="text-sm text-muted-foreground">Active verifications</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-medium flex items-center">
+                <CalendarRange className="h-4 w-4 mr-2 text-blue-500" />
+                Scheduled
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{activityCounts.scheduled}</div>
+              <p className="text-sm text-muted-foreground">Upcoming verifications</p>
+            </CardContent>
+          </Card>
         </div>
+        
+        <div className="mb-6 flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search verifications..." 
+              className="pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-3">
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="w-[160px]">
+                <div className="flex items-center">
+                  <Filter className="mr-2 h-4 w-4" />
+                  <span>Type</span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="audit">Audit</SelectItem>
+                  <SelectItem value="certification">Certification</SelectItem>
+                  <SelectItem value="report">Report</SelectItem>
+                  <SelectItem value="update">Update</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-[160px]">
+                <div className="flex items-center">
+                  <Filter className="mr-2 h-4 w-4" />
+                  <span>Status</span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="in-progress">In Progress</SelectItem>
+                  <SelectItem value="scheduled">Scheduled</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        <Tabs defaultValue="all" className="mt-6">
+          <TabsList className="grid w-full grid-cols-3 md:w-auto md:inline-flex">
+            <TabsTrigger value="all">All Verifications</TabsTrigger>
+            <TabsTrigger value="active">Active</TabsTrigger>
+            <TabsTrigger value="recent">Recent</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="all" className="mt-6">
+            <div className="space-y-4">
+              {filteredActivities.length > 0 ? (
+                filteredActivities.map((activity) => {
+                  const supplier = suppliers.find(s => s.name === activity.supplier);
+                  
+                  return (
+                    <Card key={activity.id} className="overflow-hidden">
+                      <div className="flex flex-col md:flex-row">
+                        <div className="p-6 flex-1">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="text-lg font-semibold">{activity.activity}</h3>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                Supplier: {activity.supplier}
+                              </p>
+                            </div>
+                            <div className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[activity.status]}`}>
+                              {activity.status}
+                            </div>
+                          </div>
+                          <div className="mt-4 flex items-center text-sm text-muted-foreground">
+                            <CalendarRange className="h-4 w-4 mr-2" />
+                            <span>{activity.date}</span>
+                            
+                            <Separator orientation="vertical" className="mx-3 h-4" />
+                            
+                            {activity.type === 'audit' && <Shield className="h-4 w-4 mr-2" />}
+                            {activity.type === 'certification' && <FileText className="h-4 w-4 mr-2" />}
+                            {activity.type === 'report' && <FileText className="h-4 w-4 mr-2" />}
+                            {activity.type === 'update' && <RefreshCw className="h-4 w-4 mr-2" />}
+                            <span className="capitalize">{activity.type}</span>
+                            
+                            {supplier && (
+                              <>
+                                <Separator orientation="vertical" className="mx-3 h-4" />
+                                <div className="flex items-center">
+                                  <span>Score: </span>
+                                  <span className="font-medium ml-1">{supplier.sustainabilityScore}</span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div className="bg-muted p-4 md:p-6 md:w-52 flex md:flex-col md:items-start items-center justify-between">
+                          <div className="md:mb-4">
+                            <p className="text-xs font-medium text-muted-foreground mb-1">Assigned to</p>
+                            <div className="flex items-center">
+                              <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center mr-2">
+                                <span className="text-xs font-medium text-primary">AJ</span>
+                              </div>
+                              <span className="text-sm font-medium">Alex Johnson</span>
+                            </div>
+                          </div>
+                          <Button size="sm" variant="outline" asChild>
+                            <Link to={`/supplier/${supplier?.id || '1'}`}>View Details</Link>
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })
+              ) : (
+                <Card className="p-8 text-center">
+                  <div className="flex flex-col items-center">
+                    <XCircle className="h-10 w-10 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-medium mb-2">No matching verifications</h3>
+                    <p className="text-sm text-muted-foreground mb-4">Try adjusting your filters or search criteria</p>
+                    <Button variant="outline" onClick={() => {
+                      setSearchTerm('');
+                      setFilterType('all');
+                      setFilterStatus('all');
+                    }}>
+                      Reset Filters
+                    </Button>
+                  </div>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="active" className="mt-6">
+            <div className="space-y-4">
+              {verificationActivities
+                .filter(a => a.status === 'in-progress')
+                .map((activity) => {
+                  const supplier = suppliers.find(s => s.name === activity.supplier);
+                  
+                  return (
+                    <Card key={activity.id} className="overflow-hidden">
+                      <div className="flex flex-col md:flex-row">
+                        <div className="p-6 flex-1">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="text-lg font-semibold">{activity.activity}</h3>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                Supplier: {activity.supplier}
+                              </p>
+                            </div>
+                            <div className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[activity.status]}`}>
+                              {activity.status}
+                            </div>
+                          </div>
+                          <div className="mt-4 flex items-center text-sm text-muted-foreground">
+                            <CalendarRange className="h-4 w-4 mr-2" />
+                            <span>{activity.date}</span>
+                            
+                            <Separator orientation="vertical" className="mx-3 h-4" />
+                            
+                            {activity.type === 'audit' && <Shield className="h-4 w-4 mr-2" />}
+                            {activity.type === 'certification' && <FileText className="h-4 w-4 mr-2" />}
+                            {activity.type === 'report' && <FileText className="h-4 w-4 mr-2" />}
+                            {activity.type === 'update' && <RefreshCw className="h-4 w-4 mr-2" />}
+                            <span className="capitalize">{activity.type}</span>
+                          </div>
+                        </div>
+                        <div className="bg-muted p-4 md:p-6 md:w-52 flex md:flex-col md:items-start items-center justify-between">
+                          <div className="md:mb-4">
+                            <p className="text-xs font-medium text-muted-foreground mb-1">Assigned to</p>
+                            <div className="flex items-center">
+                              <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center mr-2">
+                                <span className="text-xs font-medium text-primary">AJ</span>
+                              </div>
+                              <span className="text-sm font-medium">Alex Johnson</span>
+                            </div>
+                          </div>
+                          <Button size="sm" variant="outline" asChild>
+                            <Link to={`/supplier/${supplier?.id || '1'}`}>View Details</Link>
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="recent" className="mt-6">
+            <div className="space-y-4">
+              {verificationActivities
+                .filter(a => a.status === 'completed')
+                .slice(0, 3)
+                .map((activity) => {
+                  const supplier = suppliers.find(s => s.name === activity.supplier);
+                  
+                  return (
+                    <Card key={activity.id} className="overflow-hidden">
+                      <div className="flex flex-col md:flex-row">
+                        <div className="p-6 flex-1">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="text-lg font-semibold">{activity.activity}</h3>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                Supplier: {activity.supplier}
+                              </p>
+                            </div>
+                            <div className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[activity.status]}`}>
+                              {activity.status}
+                            </div>
+                          </div>
+                          <div className="mt-4 flex items-center text-sm text-muted-foreground">
+                            <CalendarRange className="h-4 w-4 mr-2" />
+                            <span>{activity.date}</span>
+                            
+                            <Separator orientation="vertical" className="mx-3 h-4" />
+                            
+                            {activity.type === 'audit' && <Shield className="h-4 w-4 mr-2" />}
+                            {activity.type === 'certification' && <FileText className="h-4 w-4 mr-2" />}
+                            {activity.type === 'report' && <FileText className="h-4 w-4 mr-2" />}
+                            {activity.type === 'update' && <RefreshCw className="h-4 w-4 mr-2" />}
+                            <span className="capitalize">{activity.type}</span>
+                          </div>
+                        </div>
+                        <div className="bg-muted p-4 md:p-6 md:w-52 flex md:flex-col md:items-start items-center justify-between">
+                          <div className="md:mb-4">
+                            <p className="text-xs font-medium text-muted-foreground mb-1">Verified by</p>
+                            <div className="flex items-center">
+                              <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center mr-2">
+                                <span className="text-xs font-medium text-primary">AJ</span>
+                              </div>
+                              <span className="text-sm font-medium">Alex Johnson</span>
+                            </div>
+                          </div>
+                          <Button size="sm" variant="outline" asChild>
+                            <Link to={`/supplier/${supplier?.id || '1'}`}>View Details</Link>
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

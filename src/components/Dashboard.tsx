@@ -6,7 +6,7 @@ import { AlertCircle, ArrowRight, CheckCircle, Clock, ExternalLink, FileText, Ma
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { suppliers } from '@/utils/mockData';
+import { suppliers, sustainabilityMetrics } from '@/utils/mockData';
 import TransitionComponent from './TransitionComponent';
 import MetricsPanel from './MetricsPanel';
 import SupplierCard from './SupplierCard';
@@ -16,7 +16,7 @@ const Dashboard = () => {
   
   return (
     <div className="space-y-8">
-      <TransitionComponent animation="fade" className="mb-4">
+      <TransitionComponent animation="fade-in" className="mb-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">Supply Chain Verification</h1>
@@ -40,7 +40,7 @@ const Dashboard = () => {
       </TransitionComponent>
 
       <TransitionComponent animation="fade-up" delay={100}>
-        <MetricsPanel />
+        <MetricsPanel metrics={sustainabilityMetrics} />
       </TransitionComponent>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

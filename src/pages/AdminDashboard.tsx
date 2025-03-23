@@ -2,41 +2,33 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
+  AlertCircle,
   BarChart3, 
-  PieChart, 
-  Users, 
-  FileCheck, 
-  Shield, 
   Bell, 
+  Calendar, 
+  CheckCircle2, 
+  ChevronDown, 
+  Clock, 
+  Download, 
+  FileText, 
+  Filter, 
+  HelpCircle,
+  Layout, 
+  MoreHorizontal, 
+  Plus, 
+  Search, 
   Settings, 
+  Shield, 
   User, 
-  Briefcase,
-  Filter,
-  ArrowUpDown,
-  FileText,
-  Download,
-  AlertTriangle
+  Users 
 } from 'lucide-react';
-import Header from '@/components/Header';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,614 +36,579 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
-  SidebarProvider,
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarRail,
-  SidebarInset,
-  SidebarTrigger,
-} from '@/components/ui/sidebar';
-import { Separator } from '@/components/ui/separator';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer';
-import { Input } from '@/components/ui/input';
-import ThemeToggle from '@/components/ThemeToggle';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import Header from '@/components/Header';
+import SustainabilityScore from '@/components/SustainabilityScore';
 import TransitionComponent from '@/components/TransitionComponent';
+import { suppliers, verificationActivities, performanceSummary } from '@/utils/mockData';
 
-// Mock data for admin dashboard
+// Mock users for the admin dashboard
 const users = [
-  { id: 1, name: 'Alex Johnson', role: 'Admin', email: 'alex@example.com', lastActive: '2023-10-15T14:30:00' },
-  { id: 2, name: 'Maria Garcia', role: 'Verifier', email: 'maria@example.com', lastActive: '2023-10-15T09:45:00' },
-  { id: 3, name: 'Sam Taylor', role: 'Verifier', email: 'sam@example.com', lastActive: '2023-10-14T16:20:00' },
-  { id: 4, name: 'Lin Wei', role: 'Manager', email: 'lin@example.com', lastActive: '2023-10-13T11:10:00' },
-  { id: 5, name: 'John Smith', role: 'Verifier', email: 'john@example.com', lastActive: '2023-10-12T15:30:00' },
+  {
+    id: "1",
+    name: "Alex Johnson",
+    email: "alex.johnson@example.com",
+    role: "Admin",
+    avatar: "/placeholder.svg"
+  },
+  {
+    id: "2",
+    name: "Sarah Williams",
+    email: "sarah.w@example.com",
+    role: "Verifier",
+    avatar: "/placeholder.svg"
+  },
+  {
+    id: "3",
+    name: "Michael Chen",
+    email: "michael.c@example.com",
+    role: "Analyst",
+    avatar: "/placeholder.svg"
+  },
+  {
+    id: "4",
+    name: "Jessica Lee",
+    email: "jessica.lee@example.com", 
+    role: "Verifier",
+    avatar: "/placeholder.svg"
+  },
 ];
 
-const recentActivities = [
-  { id: 1, user: 'Maria Garcia', action: 'Approved verification request', time: '2 hours ago', target: 'EcoFabrics Inc.' },
-  { id: 2, user: 'System', action: 'Scheduled automatic audit', time: '5 hours ago', target: 'Green Logistics Ltd.' },
-  { id: 3, user: 'Alex Johnson', action: 'Updated system settings', time: '1 day ago', target: 'Verification thresholds' },
-  { id: 4, user: 'Sam Taylor', action: 'Rejected verification request', time: '1 day ago', target: 'Bio Plastics Ltd.' },
-  { id: 5, user: 'Lin Wei', action: 'Generated monthly report', time: '2 days ago', target: 'September Verifications' },
+// Mock reports for the admin dashboard
+const reports = [
+  {
+    id: "1",
+    title: "Q1 Sustainability Report 2023",
+    date: "2023-03-30",
+    status: "published"
+  },
+  {
+    id: "2",
+    title: "Q2 Sustainability Report 2023",
+    date: "2023-06-30",
+    status: "published"
+  },
+  {
+    id: "3",
+    title: "Q3 Sustainability Report 2023",
+    date: "2023-09-30",
+    status: "published"
+  },
+  {
+    id: "4",
+    title: "Q4 Sustainability Report 2023",
+    date: "2023-12-30",
+    status: "draft"
+  },
+  {
+    id: "5",
+    title: "Annual Sustainability Report 2023",
+    date: "2024-01-15",
+    status: "draft"
+  },
 ];
 
-const pendingTasks = [
-  { id: 1, task: 'Review verification standards update', deadline: '2023-10-20', priority: 'high' },
-  { id: 2, task: 'Approve new verifier accounts', deadline: '2023-10-18', priority: 'medium' },
-  { id: 3, task: 'Finalize quarterly sustainability report', deadline: '2023-10-31', priority: 'high' },
-  { id: 4, task: 'Schedule training for new verification protocol', deadline: '2023-11-05', priority: 'medium' },
-  { id: 5, task: 'Update data retention policy', deadline: '2023-11-10', priority: 'low' },
-];
-
-const systemAlerts = [
-  { id: 1, message: 'System maintenance scheduled for October 20', type: 'info' },
-  { id: 2, message: '3 verification requests pending for more than 7 days', type: 'warning' },
-  { id: 3, message: 'New sustainable certification standard available', type: 'update' },
-  { id: 4, message: 'Database backup completed successfully', type: 'success' },
+// Mock tasks for the admin dashboard
+const tasks = [
+  {
+    id: "1",
+    title: "Review EcoHarvest verification report",
+    dueDate: "2023-12-10",
+    priority: "high",
+    assignee: "Alex Johnson",
+    status: "pending"
+  },
+  {
+    id: "2",
+    title: "Schedule audit for GreenTech Manufacturing",
+    dueDate: "2023-12-15",
+    priority: "medium",
+    assignee: "Sarah Williams",
+    status: "in-progress"
+  },
+  {
+    id: "3",
+    title: "Update sustainability metrics dashboard",
+    dueDate: "2023-12-05",
+    priority: "high",
+    assignee: "Michael Chen",
+    status: "completed"
+  },
+  {
+    id: "4",
+    title: "Review Q4 environmental compliance",
+    dueDate: "2023-12-20",
+    priority: "medium",
+    assignee: "Jessica Lee",
+    status: "pending"
+  },
+  {
+    id: "5",
+    title: "Prepare annual sustainability report draft",
+    dueDate: "2023-12-28",
+    priority: "high",
+    assignee: "Alex Johnson",
+    status: "in-progress"
+  },
 ];
 
 const AdminDashboard = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
-
-  const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchValue.toLowerCase()) ||
-    user.role.toLowerCase().includes(searchValue.toLowerCase())
+  const [searchSuppliers, setSearchSuppliers] = useState('');
+  const [searchUsers, setSearchUsers] = useState('');
+  const [searchReports, setSearchReports] = useState('');
+  
+  const filteredSuppliers = suppliers.filter(supplier => 
+    supplier.name.toLowerCase().includes(searchSuppliers.toLowerCase()) ||
+    supplier.location.toLowerCase().includes(searchSuppliers.toLowerCase()) ||
+    supplier.category.toLowerCase().includes(searchSuppliers.toLowerCase())
   );
-
+  
+  const filteredUsers = users.filter(user => 
+    user.name.toLowerCase().includes(searchUsers.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchUsers.toLowerCase()) ||
+    user.role.toLowerCase().includes(searchUsers.toLowerCase())
+  );
+  
+  const filteredReports = reports.filter(report => 
+    report.title.toLowerCase().includes(searchReports.toLowerCase())
+  );
+  
+  const pendingVerifications = verificationActivities.filter(a => 
+    a.status === 'in-progress' || a.status === 'scheduled'
+  ).length;
+  
+  const pendingTasks = tasks.filter(t => t.status !== 'completed').length;
+  
+  const getPriorityStyle = (priority: string) => {
+    switch (priority) {
+      case 'high':
+        return 'text-red-500 bg-red-50 dark:bg-red-900/20 dark:text-red-300';
+      case 'medium':
+        return 'text-amber-500 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-300';
+      case 'low':
+        return 'text-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-300';
+      default:
+        return 'text-slate-500 bg-slate-50 dark:bg-slate-900/20 dark:text-slate-300';
+    }
+  };
+  
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'text-green-500 bg-green-50 dark:bg-green-900/20 dark:text-green-300';
+      case 'in-progress':
+        return 'text-amber-500 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-300';
+      case 'pending':
+        return 'text-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-300';
+      default:
+        return 'text-slate-500 bg-slate-50 dark:bg-slate-900/20 dark:text-slate-300';
+    }
+  };
+  
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="bg-background flex w-full min-h-screen">
-        <Sidebar>
-          <SidebarHeader>
-            <div className="flex items-center justify-between px-2">
-              <div className="flex items-center space-x-2">
-                <Shield className="h-6 w-6 text-primary" />
-                <span className="text-lg font-bold">SupplyVerify</span>
-              </div>
-              <SidebarTrigger />
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="container mx-auto px-4 md:px-6 pt-24 pb-16">
+        <TransitionComponent animation="fade-in" className="mb-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
+              <p className="text-muted-foreground">Manage your supply chain verification platform</p>
             </div>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={true}>
-                      <Link to="/admin">
-                        <BarChart3 />
-                        <span>Overview</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/">
-                        <PieChart />
-                        <span>Analytics</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-            
-            <SidebarGroup>
-              <SidebarGroupLabel>Management</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/verification">
-                        <FileCheck />
-                        <span>Verifications</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/">
-                        <Briefcase />
-                        <span>Suppliers</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link to="/">
-                        <Users />
-                        <span>Users</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-            
-            <SidebarGroup>
-              <SidebarGroupLabel>System</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <button>
-                        <Settings />
-                        <span>Settings</span>
-                      </button>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <button>
-                        <Bell />
-                        <span>Notifications</span>
-                      </button>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-          <SidebarFooter>
-            <div className="p-4 flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
+            <div className="flex space-x-2">
+              <Button variant="outline" size="icon">
+                <Bell className="h-5 w-5" />
+              </Button>
+              <Button variant="outline" size="icon">
+                <Settings className="h-5 w-5" />
+              </Button>
+              <Button className="gap-1">
                 <User className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Alex Johnson</p>
-                <p className="text-xs text-muted-foreground">Admin</p>
-              </div>
-              <div className="ml-auto">
-                <ThemeToggle />
-              </div>
-            </div>
-          </SidebarFooter>
-          <SidebarRail />
-        </Sidebar>
-        
-        <SidebarInset>
-          <Header hideNav />
-          <div className="container px-4 pt-20 pb-16">
-            <TransitionComponent animation="fade" className="mb-6">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-                  <p className="text-muted-foreground">Manage verification processes and system settings</p>
-                </div>
-                <div className="mt-4 md:mt-0 space-x-2">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="outline">
-                        <Settings className="mr-2 h-4 w-4" />
-                        Settings
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>System Settings</DialogTitle>
-                        <DialogDescription>
-                          Configure system settings and preferences.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="grid gap-4 py-4">
-                        <div className="space-y-2">
-                          <h3 className="text-sm font-medium">Verification Settings</h3>
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="space-y-1">
-                              <label className="text-xs" htmlFor="threshold">Review Threshold (days)</label>
-                              <Input id="threshold" defaultValue="7" />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs" htmlFor="approvers">Min. Approvers</label>
-                              <Input id="approvers" defaultValue="2" />
-                            </div>
-                          </div>
-                        </div>
-                        <Separator />
-                        <div className="space-y-2">
-                          <h3 className="text-sm font-medium">Notification Preferences</h3>
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="flex items-center space-x-2">
-                              <input type="checkbox" id="email-notif" className="rounded border-gray-300" defaultChecked />
-                              <label htmlFor="email-notif" className="text-xs">Email Notifications</label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <input type="checkbox" id="system-notif" className="rounded border-gray-300" defaultChecked />
-                              <label htmlFor="system-notif" className="text-xs">System Alerts</label>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <Button variant="outline">Cancel</Button>
-                        <Button>Save Changes</Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                  
-                  <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-                    <DrawerTrigger asChild>
-                      <Button>
-                        <FileText className="mr-2 h-4 w-4" />
-                        Generate Report
-                      </Button>
-                    </DrawerTrigger>
-                    <DrawerContent>
-                      <DrawerHeader>
-                        <DrawerTitle>Generate System Report</DrawerTitle>
-                        <DrawerDescription>
-                          Create a custom report for your verification processes.
-                        </DrawerDescription>
-                      </DrawerHeader>
-                      <div className="p-4 space-y-4">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium">Report Type</label>
-                          <select className="w-full rounded-md border border-input p-2">
-                            <option>Verification Summary</option>
-                            <option>User Activity</option>
-                            <option>Supplier Compliance</option>
-                            <option>System Performance</option>
-                          </select>
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium">Date Range</label>
-                          <div className="flex space-x-2">
-                            <Input type="date" placeholder="Start Date" />
-                            <Input type="date" placeholder="End Date" />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium">Include Sections</label>
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="flex items-center space-x-2">
-                              <input type="checkbox" id="summary" className="rounded border-gray-300" defaultChecked />
-                              <label htmlFor="summary" className="text-sm">Executive Summary</label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <input type="checkbox" id="charts" className="rounded border-gray-300" defaultChecked />
-                              <label htmlFor="charts" className="text-sm">Charts & Graphs</label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <input type="checkbox" id="details" className="rounded border-gray-300" defaultChecked />
-                              <label htmlFor="details" className="text-sm">Detailed Records</label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <input type="checkbox" id="recommendations" className="rounded border-gray-300" defaultChecked />
-                              <label htmlFor="recommendations" className="text-sm">Recommendations</label>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <DrawerFooter>
-                        <Button>
-                          <Download className="mr-2 h-4 w-4" />
-                          Generate Report
-                        </Button>
-                        <DrawerClose asChild>
-                          <Button variant="outline">Cancel</Button>
-                        </DrawerClose>
-                      </DrawerFooter>
-                    </DrawerContent>
-                  </Drawer>
-                </div>
-              </div>
-            </TransitionComponent>
-
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              <TransitionComponent animation="fade-up" delay={100}>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Verifications</CardTitle>
-                    <FileCheck className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">1,284</div>
-                    <p className="text-xs text-muted-foreground">
-                      +12.5% from last month
-                    </p>
-                  </CardContent>
-                </Card>
-              </TransitionComponent>
-              
-              <TransitionComponent animation="fade-up" delay={150}>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Active Suppliers</CardTitle>
-                    <Briefcase className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">342</div>
-                    <p className="text-xs text-muted-foreground">
-                      +4.3% from last month
-                    </p>
-                  </CardContent>
-                </Card>
-              </TransitionComponent>
-              
-              <TransitionComponent animation="fade-up" delay={200}>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">System Users</CardTitle>
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">38</div>
-                    <p className="text-xs text-muted-foreground">
-                      +2 new users this month
-                    </p>
-                  </CardContent>
-                </Card>
-              </TransitionComponent>
-              
-              <TransitionComponent animation="fade-up" delay={250}>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
-                    <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">12</div>
-                    <p className="text-xs text-muted-foreground">
-                      3 require immediate attention
-                    </p>
-                  </CardContent>
-                </Card>
-              </TransitionComponent>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7 mt-6">
-              <TransitionComponent animation="fade-up" delay={300} className="lg:col-span-4">
-                <Card className="h-full">
-                  <CardHeader>
-                    <CardTitle>System Users</CardTitle>
-                    <CardDescription>
-                      Manage user accounts and permissions
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex w-full max-w-sm items-center space-x-2 mb-4">
-                      <Input 
-                        placeholder="Search users..." 
-                        value={searchValue}
-                        onChange={(e) => setSearchValue(e.target.value)}
-                      />
-                      <Button variant="outline" size="sm">
-                        <Filter className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <div className="rounded-md border">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-[300px]">
-                              <Button variant="ghost" className="p-0 font-medium flex items-center">
-                                Name
-                                <ArrowUpDown className="ml-2 h-4 w-4" />
-                              </Button>
-                            </TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead>Last Active</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {filteredUsers.map(user => (
-                            <TableRow key={user.id}>
-                              <TableCell className="font-medium">
-                                <div>
-                                  <div>{user.name}</div>
-                                  <div className="text-xs text-muted-foreground">{user.email}</div>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant={user.role === 'Admin' ? 'destructive' : user.role === 'Manager' ? 'default' : 'outline'}>
-                                  {user.role}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                {new Date(user.lastActive).toLocaleDateString()} at {new Date(user.lastActive).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm">
-                                      <span className="sr-only">Open menu</span>
-                                      <Settings className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                    <DropdownMenuItem>View profile</DropdownMenuItem>
-                                    <DropdownMenuItem>Edit permissions</DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem className="text-red-600">Deactivate</DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="justify-between">
-                    <Button variant="outline" size="sm">Previous</Button>
-                    <div className="text-sm text-muted-foreground">Page 1 of 1</div>
-                    <Button variant="outline" size="sm">Next</Button>
-                  </CardFooter>
-                </Card>
-              </TransitionComponent>
-              
-              <TransitionComponent animation="fade-up" delay={350} className="lg:col-span-3">
-                <Card className="h-full">
-                  <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
-                    <CardDescription>
-                      Latest actions in the system
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-8">
-                      {recentActivities.map(activity => (
-                        <div key={activity.id} className="flex">
-                          <div className="relative mr-4">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
-                              <User className="h-4 w-4 text-primary" />
-                            </div>
-                            <span className="absolute top-0 right-0 flex h-3 w-3 rounded-full bg-green-500 ring-2 ring-background"></span>
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-sm font-medium leading-none">
-                              {activity.user}
-                              <span className="text-xs text-muted-foreground ml-2">
-                                {activity.time}
-                              </span>
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {activity.action} - <strong>{activity.target}</strong>
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="ghost" size="sm" className="w-full">View All Activity</Button>
-                  </CardFooter>
-                </Card>
-              </TransitionComponent>
-            </div>
-            
-            <div className="grid gap-6 md:grid-cols-2 mt-6">
-              <TransitionComponent animation="fade-up" delay={400}>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>System Alerts</CardTitle>
-                    <CardDescription>
-                      Important notifications requiring attention
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {systemAlerts.map(alert => (
-                        <div 
-                          key={alert.id} 
-                          className={`p-4 rounded-lg border ${
-                            alert.type === 'warning' 
-                              ? 'bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800' 
-                              : alert.type === 'info' 
-                                ? 'bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800'
-                                : alert.type === 'success'
-                                  ? 'bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-800'
-                                  : 'bg-purple-50 border-purple-200 dark:bg-purple-950/30 dark:border-purple-800'
-                          }`}
-                        >
-                          <div className="flex items-start">
-                            <div className={`rounded-full p-1 mr-3 ${
-                              alert.type === 'warning' 
-                                ? 'bg-amber-100 dark:bg-amber-900'
-                                : alert.type === 'info'
-                                  ? 'bg-blue-100 dark:bg-blue-900'
-                                  : alert.type === 'success'
-                                    ? 'bg-green-100 dark:bg-green-900'
-                                    : 'bg-purple-100 dark:bg-purple-900'
-                            }`}>
-                              {alert.type === 'warning' && <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />}
-                              {alert.type === 'info' && <Bell className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
-                              {alert.type === 'success' && <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />}
-                              {alert.type === 'update' && <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />}
-                            </div>
-                            <div>
-                              <p className={`text-sm font-medium ${
-                                alert.type === 'warning' 
-                                  ? 'text-amber-800 dark:text-amber-300'
-                                  : alert.type === 'info'
-                                    ? 'text-blue-800 dark:text-blue-300'
-                                    : alert.type === 'success'
-                                      ? 'text-green-800 dark:text-green-300'
-                                      : 'text-purple-800 dark:text-purple-300'
-                              }`}>
-                                {alert.message}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TransitionComponent>
-              
-              <TransitionComponent animation="fade-up" delay={450}>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Pending Tasks</CardTitle>
-                    <CardDescription>
-                      Tasks requiring action
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {pendingTasks.map(task => (
-                        <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div className="flex items-start gap-3">
-                            <div className={`rounded-full h-2 w-2 mt-2 ${
-                              task.priority === 'high' 
-                                ? 'bg-red-500' 
-                                : task.priority === 'medium' 
-                                  ? 'bg-amber-500' 
-                                  : 'bg-blue-500'
-                            }`} />
-                            <div>
-                              <p className="text-sm font-medium">{task.task}</p>
-                              <p className="text-xs text-muted-foreground">Due: {new Date(task.deadline).toLocaleDateString()}</p>
-                            </div>
-                          </div>
-                          <Button variant="outline" size="sm">Start</Button>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="ghost" size="sm" className="w-full">View All Tasks</Button>
-                  </CardFooter>
-                </Card>
-              </TransitionComponent>
+                <span>Account</span>
+              </Button>
             </div>
           </div>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+        </TransitionComponent>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 my-8">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-medium">Total Suppliers</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{suppliers.length}</div>
+              <p className="text-sm text-muted-foreground">
+                <span className="text-green-500">+2</span> added this month
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-medium">Pending Verifications</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{pendingVerifications}</div>
+              <p className="text-sm text-muted-foreground">
+                <span className="text-amber-500">3</span> require attention
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-medium">Platform Users</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{users.length}</div>
+              <p className="text-sm text-muted-foreground">
+                Across {users.filter(u => u.role === 'Admin').length} admins and {users.filter(u => u.role === 'Verifier').length} verifiers
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-medium">Pending Tasks</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{pendingTasks}</div>
+              <p className="text-sm text-muted-foreground">
+                <span className="text-red-500">{tasks.filter(t => t.priority === 'high' && t.status !== 'completed').length}</span> high priority
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <Tabs defaultValue="suppliers" className="mt-6">
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-flex">
+            <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="reports">Reports</TabsTrigger>
+            <TabsTrigger value="tasks">Tasks</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="suppliers" className="mt-6 space-y-4">
+            <div className="flex flex-col md:flex-row gap-4 justify-between">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Search suppliers..." 
+                  className="pl-10"
+                  value={searchSuppliers}
+                  onChange={(e) => setSearchSuppliers(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" className="gap-1">
+                  <Filter className="h-4 w-4" />
+                  <span>Filter</span>
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+                <Button className="gap-1">
+                  <Plus className="h-4 w-4" />
+                  <span>Add Supplier</span>
+                </Button>
+              </div>
+            </div>
+            
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Score</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredSuppliers.map((supplier) => (
+                      <TableRow key={supplier.id}>
+                        <TableCell className="font-medium">
+                          <Link to={`/supplier/${supplier.id}`} className="hover:underline">
+                            {supplier.name}
+                          </Link>
+                        </TableCell>
+                        <TableCell>{supplier.category}</TableCell>
+                        <TableCell>{supplier.location}</TableCell>
+                        <TableCell>
+                          <Badge variant={
+                            supplier.verificationStatus === 'verified' ? 'default' : 
+                            supplier.verificationStatus === 'pending' ? 'outline' : 'secondary'
+                          }>
+                            {supplier.verificationStatus}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <SustainabilityScore score={supplier.sustainabilityScore} size="sm" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem>View Details</DropdownMenuItem>
+                              <DropdownMenuItem>Edit Supplier</DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-red-600">Remove Supplier</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+              <CardFooter className="flex justify-between border-t px-6 py-4">
+                <div className="text-sm text-muted-foreground">
+                  Showing <strong>{filteredSuppliers.length}</strong> of <strong>{suppliers.length}</strong> suppliers
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button variant="outline" size="sm" disabled>Previous</Button>
+                  <Button variant="outline" size="sm">Next</Button>
+                </div>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="users" className="mt-6 space-y-4">
+            <div className="flex flex-col md:flex-row gap-4 justify-between">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Search users..." 
+                  className="pl-10"
+                  value={searchUsers}
+                  onChange={(e) => setSearchUsers(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" className="gap-1">
+                  <Filter className="h-4 w-4" />
+                  <span>Filter</span>
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+                <Button className="gap-1">
+                  <Plus className="h-4 w-4" />
+                  <span>Add User</span>
+                </Button>
+              </div>
+            </div>
+            
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={user.avatar} alt={user.name} />
+                              <AvatarFallback>{user.name.charAt(0) + user.name.split(' ')[1]?.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div className="font-medium">{user.name}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>
+                          <Badge variant={user.role === 'Admin' ? 'default' : 'outline'}>
+                            {user.role}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem>View Profile</DropdownMenuItem>
+                              <DropdownMenuItem>Edit User</DropdownMenuItem>
+                              <DropdownMenuItem>Assign Tasks</DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-red-600">Deactivate Account</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="reports" className="mt-6 space-y-4">
+            <div className="flex flex-col md:flex-row gap-4 justify-between">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Search reports..." 
+                  className="pl-10"
+                  value={searchReports}
+                  onChange={(e) => setSearchReports(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" className="gap-1">
+                  <Download className="h-4 w-4" />
+                  <span>Export</span>
+                </Button>
+                <Button className="gap-1">
+                  <Plus className="h-4 w-4" />
+                  <span>Create Report</span>
+                </Button>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredReports.map((report) => (
+                <Card key={report.id} className="flex flex-col h-full">
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <CardTitle className="text-lg">{report.title}</CardTitle>
+                      <Badge variant={report.status === 'published' ? 'default' : 'secondary'}>
+                        {report.status}
+                      </Badge>
+                    </div>
+                    <CardDescription>
+                      Created on {new Date(report.date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex-1">
+                    <div className="flex items-center text-sm text-muted-foreground mb-4">
+                      <FileText className="h-4 w-4 mr-2" />
+                      <span>Sustainability Report</span>
+                      
+                      <Separator orientation="vertical" className="mx-3 h-4" />
+                      
+                      <User className="h-4 w-4 mr-2" />
+                      <span>Alex Johnson</span>
+                    </div>
+                    
+                    <p className="text-sm">
+                      {report.status === 'published' 
+                        ? 'This report contains verified sustainability metrics and compliance data for the specified period.' 
+                        : 'This report is currently in draft stage and is awaiting final review before publication.'}
+                    </p>
+                  </CardContent>
+                  <CardFooter className="border-t pt-4">
+                    <div className="flex justify-between items-center w-full">
+                      <Button variant="outline" size="sm">Preview</Button>
+                      <Button size="sm">
+                        {report.status === 'published' ? 'Download' : 'Edit Draft'}
+                      </Button>
+                    </div>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="tasks" className="mt-6 space-y-4">
+            <div className="flex flex-col md:flex-row gap-4 justify-between">
+              <div className="text-sm text-muted-foreground">
+                Showing <strong>{tasks.length}</strong> tasks, <strong>{tasks.filter(t => t.status !== 'completed').length}</strong> pending
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" className="gap-1">
+                  <Filter className="h-4 w-4" />
+                  <span>Filter</span>
+                </Button>
+                <Button className="gap-1">
+                  <Plus className="h-4 w-4" />
+                  <span>Add Task</span>
+                </Button>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              {tasks.map((task) => (
+                <Card key={task.id} className="overflow-hidden">
+                  <div className="flex items-start p-4 md:p-6">
+                    <div className="mr-4 mt-1">
+                      {task.status === 'completed' ? (
+                        <div className="h-5 w-5 rounded-full bg-green-100 flex items-center justify-center">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        </div>
+                      ) : task.status === 'in-progress' ? (
+                        <div className="h-5 w-5 rounded-full bg-amber-100 flex items-center justify-center">
+                          <Clock className="h-4 w-4 text-amber-600" />
+                        </div>
+                      ) : (
+                        <div className="h-5 w-5 rounded-full bg-blue-100 flex items-center justify-center">
+                          <AlertCircle className="h-4 w-4 text-blue-600" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1">
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                        <h3 className="text-base font-medium">{task.title}</h3>
+                        <div className="flex items-center space-x-2">
+                          <span className={`text-xs font-medium px-2 py-1 rounded-full ${getPriorityStyle(task.priority)}`}>
+                            {task.priority}
+                          </span>
+                          <span className={`text-xs font-medium px-2 py-1 rounded-full ${getStatusStyle(task.status)}`}>
+                            {task.status}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col md:flex-row md:items-center text-sm text-muted-foreground mt-2 gap-y-2 md:gap-x-4">
+                        <div className="flex items-center">
+                          <Calendar className="h-4 w-4 mr-2" />
+                          <span>Due: {task.dueDate}</span>
+                        </div>
+                        
+                        <div className="flex items-center">
+                          <User className="h-4 w-4 mr-2" />
+                          <span>Assigned to: {task.assignee}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="ml-2 md:ml-4 flex items-center">
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </main>
+    </div>
   );
 };
 
