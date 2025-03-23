@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,15 +11,26 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Palette, Globe, Lock, Database, Trash2, Clock } from 'lucide-react';
 import Header from '@/components/Header';
+import ThemeSettings, { ColorTheme } from '@/components/ThemeSettings';
+import { useTheme } from '@/context/ThemeContext';
 
 const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { colorTheme, setColorTheme } = useTheme();
 
   const saveSettings = () => {
     toast({
       title: "Settings Saved",
       description: "Your settings have been updated successfully.",
+    });
+  };
+
+  const handleColorThemeChange = (theme: ColorTheme) => {
+    setColorTheme(theme);
+    toast({
+      title: "Theme Updated",
+      description: `Color theme set to ${theme.charAt(0).toUpperCase() + theme.slice(1)}.`,
     });
   };
 
@@ -190,28 +200,10 @@ const Settings = () => {
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Color Theme</h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card className="p-4 border-2 border-primary cursor-pointer">
-                      <div className="space-y-2">
-                        <div className="h-20 bg-primary rounded-md"></div>
-                        <p className="text-center font-medium">Default</p>
-                      </div>
-                    </Card>
-                    
-                    <Card className="p-4 cursor-pointer">
-                      <div className="space-y-2">
-                        <div className="h-20 bg-blue-600 rounded-md"></div>
-                        <p className="text-center font-medium">Blue</p>
-                      </div>
-                    </Card>
-                    
-                    <Card className="p-4 cursor-pointer">
-                      <div className="space-y-2">
-                        <div className="h-20 bg-green-600 rounded-md"></div>
-                        <p className="text-center font-medium">Green</p>
-                      </div>
-                    </Card>
-                  </div>
+                  <ThemeSettings 
+                    selectedTheme={colorTheme} 
+                    onChange={handleColorThemeChange} 
+                  />
                 </div>
                 
                 <Separator className="my-4" />
