@@ -1,9 +1,12 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, mockAuth } from '@/lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+
+// Check if we're using mock authentication
+const isMockClient = !import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 type AuthContextType = {
   user: User | null;
@@ -25,6 +28,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const setData = async () => {
+      if (isMockClient) {
+        // For development, set a mock user after a delay to simulate loading
+        setTimeout(() => {
+          setUser({ email: 'admin@example.com', id: '1' } as User);
+          setSession({ user: { email: 'admin@example.com', id: '1' } as User } as Session);
+          setLoading(false);
+        }, 500);
+        return;
+      }
+
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) {
         console.error(error);
@@ -36,25 +49,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
+    if (isMockClient) {
+      // Skip subscription for mock client
+      setData();
+    } else {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (_event, session) => {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false);
+        }
+      );
 
-    setData();
+      setData();
 
-    return () => {
-      subscription.unsubscribe();
-    };
+      return () => {
+        if (subscription) subscription.unsubscribe();
+      };
+    }
   }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      let error;
+      
+      if (isMockClient) {
+        const result = await mockAuth.signIn(email, password);
+        error = result.error;
+        
+        if (!error) {
+          // Set mock user for development
+          setUser({ email, id: '1' } as User);
+          setSession({ user: { email, id: '1' } as User } as Session);
+        }
+      } else {
+        const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+        error = authError;
+      }
       
       if (error) {
         toast({
@@ -82,7 +115,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signOut();
+      
+      let error;
+      
+      if (isMockClient) {
+        const result = await mockAuth.signOut();
+        error = result.error;
+        
+        // Clear mock user data
+        setUser(null);
+        setSession(null);
+      } else {
+        const { error: authError } = await supabase.auth.signOut();
+        error = authError;
+      }
       
       if (error) {
         toast({
