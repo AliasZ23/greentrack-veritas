@@ -1,52 +1,11 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// For development purposes only - in production, use environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-supabase-project-url.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-supabase-anon-key';
+// Use the specific Supabase URL and anon key you provided
+const supabaseUrl = 'https://lqzmcseprzlsqhpztqav.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxxem1jc2Vwcnpsc3FocHp0cWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI3MDI4ODAsImV4cCI6MjA1ODI3ODg4MH0.qrCD-OzqJUYO5G6npN423tA_n7bfXJhCQZVsDy8gBtU';
 
-// Create a temporary mock client if credentials are not provided
-const isMockClient = !import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY;
-
+// Remove the fallback and use the provided credentials directly
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Add mock authentication for development
-if (isMockClient) {
-  console.warn(
-    'Using mock Supabase client. For production, set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.'
-  );
-}
-
-// Mock authentication methods for development
-export const mockAuth = {
-  signIn: async (email: string, password: string) => {
-    // Mock successful authentication for admin@example.com/password
-    if (email === 'admin@example.com' && password === 'password') {
-      return { error: null };
-    }
-    return { error: { message: 'Invalid login credentials' } };
-  },
-  signUp: async (email: string, password: string) => {
-    // Mock successful sign up
-    if (email && password && password.length >= 6) {
-      return { 
-        data: { user: { email, id: Math.random().toString(36).substring(2, 15) } }, 
-        error: null 
-      };
-    }
-    return { data: null, error: { message: 'Invalid sign up credentials' } };
-  },
-  signOut: async () => {
-    return { error: null };
-  },
-  getSession: async () => {
-    return { 
-      data: { 
-        session: { 
-          user: { email: 'admin@example.com', id: '1' } 
-        } 
-      }, 
-      error: null 
-    };
-  }
-};
+// Remove mock authentication warning since we're now using real credentials
