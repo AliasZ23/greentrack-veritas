@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -20,7 +19,8 @@ import {
   Settings, 
   Shield, 
   User, 
-  Users 
+  Users,
+  X 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,6 +36,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import {
   Table,
@@ -50,126 +51,34 @@ import SustainabilityScore from '@/components/SustainabilityScore';
 import TransitionComponent from '@/components/TransitionComponent';
 import { suppliers, verificationActivities, performanceSummary } from '@/utils/mockData';
 
-// Mock users for the admin dashboard
-const users = [
-  {
-    id: "1",
-    name: "Alex Johnson",
-    email: "alex.johnson@example.com",
-    role: "Admin",
-    avatar: "/placeholder.svg"
-  },
-  {
-    id: "2",
-    name: "Sarah Williams",
-    email: "sarah.w@example.com",
-    role: "Verifier",
-    avatar: "/placeholder.svg"
-  },
-  {
-    id: "3",
-    name: "Michael Chen",
-    email: "michael.c@example.com",
-    role: "Analyst",
-    avatar: "/placeholder.svg"
-  },
-  {
-    id: "4",
-    name: "Jessica Lee",
-    email: "jessica.lee@example.com", 
-    role: "Verifier",
-    avatar: "/placeholder.svg"
-  },
-];
-
-// Mock reports for the admin dashboard
-const reports = [
-  {
-    id: "1",
-    title: "Q1 Sustainability Report 2023",
-    date: "2023-03-30",
-    status: "published"
-  },
-  {
-    id: "2",
-    title: "Q2 Sustainability Report 2023",
-    date: "2023-06-30",
-    status: "published"
-  },
-  {
-    id: "3",
-    title: "Q3 Sustainability Report 2023",
-    date: "2023-09-30",
-    status: "published"
-  },
-  {
-    id: "4",
-    title: "Q4 Sustainability Report 2023",
-    date: "2023-12-30",
-    status: "draft"
-  },
-  {
-    id: "5",
-    title: "Annual Sustainability Report 2023",
-    date: "2024-01-15",
-    status: "draft"
-  },
-];
-
-// Mock tasks for the admin dashboard
-const tasks = [
-  {
-    id: "1",
-    title: "Review EcoHarvest verification report",
-    dueDate: "2023-12-10",
-    priority: "high",
-    assignee: "Alex Johnson",
-    status: "pending"
-  },
-  {
-    id: "2",
-    title: "Schedule audit for GreenTech Manufacturing",
-    dueDate: "2023-12-15",
-    priority: "medium",
-    assignee: "Sarah Williams",
-    status: "in-progress"
-  },
-  {
-    id: "3",
-    title: "Update sustainability metrics dashboard",
-    dueDate: "2023-12-05",
-    priority: "high",
-    assignee: "Michael Chen",
-    status: "completed"
-  },
-  {
-    id: "4",
-    title: "Review Q4 environmental compliance",
-    dueDate: "2023-12-20",
-    priority: "medium",
-    assignee: "Jessica Lee",
-    status: "pending"
-  },
-  {
-    id: "5",
-    title: "Prepare annual sustainability report draft",
-    dueDate: "2023-12-28",
-    priority: "high",
-    assignee: "Alex Johnson",
-    status: "in-progress"
-  },
-];
-
 const AdminDashboard = () => {
   const [searchSuppliers, setSearchSuppliers] = useState('');
   const [searchUsers, setSearchUsers] = useState('');
   const [searchReports, setSearchReports] = useState('');
   
-  const filteredSuppliers = suppliers.filter(supplier => 
-    supplier.name.toLowerCase().includes(searchSuppliers.toLowerCase()) ||
-    supplier.location.toLowerCase().includes(searchSuppliers.toLowerCase()) ||
-    supplier.category.toLowerCase().includes(searchSuppliers.toLowerCase())
-  );
+  const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [locationFilter, setLocationFilter] = useState<string[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
+  
+  const categories = [...new Set(suppliers.map(s => s.category))];
+  const statuses = [...new Set(suppliers.map(s => s.verificationStatus))];
+  const locations = [...new Set(suppliers.map(s => s.location))];
+  
+  const filteredSuppliers = suppliers.filter(supplier => {
+    const matchesSearch = 
+      supplier.name.toLowerCase().includes(searchSuppliers.toLowerCase()) ||
+      supplier.location.toLowerCase().includes(searchSuppliers.toLowerCase()) ||
+      supplier.category.toLowerCase().includes(searchSuppliers.toLowerCase());
+    
+    const matchesCategory = categoryFilter.length === 0 || categoryFilter.includes(supplier.category);
+    
+    const matchesStatus = statusFilter.length === 0 || statusFilter.includes(supplier.verificationStatus);
+    
+    const matchesLocation = locationFilter.length === 0 || locationFilter.includes(supplier.location);
+    
+    return matchesSearch && matchesCategory && matchesStatus && matchesLocation;
+  });
   
   const filteredUsers = users.filter(user => 
     user.name.toLowerCase().includes(searchUsers.toLowerCase()) ||
@@ -213,6 +122,37 @@ const AdminDashboard = () => {
     }
   };
   
+  const toggleCategoryFilter = (category: string) => {
+    setCategoryFilter(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+  
+  const toggleStatusFilter = (status: string) => {
+    setStatusFilter(prev => 
+      prev.includes(status) 
+        ? prev.filter(s => s !== status)
+        : [...prev, status]
+    );
+  };
+  
+  const toggleLocationFilter = (location: string) => {
+    setLocationFilter(prev => 
+      prev.includes(location) 
+        ? prev.filter(l => l !== location)
+        : [...prev, location]
+    );
+  };
+  
+  const clearFilters = () => {
+    setCategoryFilter([]);
+    setStatusFilter([]);
+    setLocationFilter([]);
+    setSearchSuppliers('');
+  };
+  
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -224,15 +164,21 @@ const AdminDashboard = () => {
               <p className="text-muted-foreground">Manage your supply chain verification platform</p>
             </div>
             <div className="flex space-x-2">
-              <Button variant="outline" size="icon">
-                <Bell className="h-5 w-5" />
+              <Button variant="outline" size="icon" asChild>
+                <Link to="/notifications">
+                  <Bell className="h-5 w-5" />
+                </Link>
               </Button>
-              <Button variant="outline" size="icon">
-                <Settings className="h-5 w-5" />
+              <Button variant="outline" size="icon" asChild>
+                <Link to="/settings">
+                  <Settings className="h-5 w-5" />
+                </Link>
               </Button>
-              <Button className="gap-1">
-                <User className="h-4 w-4" />
-                <span>Account</span>
+              <Button className="gap-1" asChild>
+                <Link to="/account">
+                  <User className="h-4 w-4" />
+                  <span>Account</span>
+                </Link>
               </Button>
             </div>
           </div>
@@ -305,17 +251,133 @@ const AdminDashboard = () => {
                 />
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" className="gap-1">
-                  <Filter className="h-4 w-4" />
-                  <span>Filter</span>
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-                <Button className="gap-1">
-                  <Plus className="h-4 w-4" />
-                  <span>Add Supplier</span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="gap-1">
+                      <Filter className="h-4 w-4" />
+                      <span>Filter</span>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuLabel>Filter Suppliers</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    
+                    <div className="p-2">
+                      <p className="text-sm font-medium mb-2">Category</p>
+                      {categories.map(category => (
+                        <DropdownMenuCheckboxItem
+                          key={category}
+                          checked={categoryFilter.includes(category)}
+                          onCheckedChange={() => toggleCategoryFilter(category)}
+                        >
+                          {category}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </div>
+                    
+                    <DropdownMenuSeparator />
+                    
+                    <div className="p-2">
+                      <p className="text-sm font-medium mb-2">Status</p>
+                      {statuses.map(status => (
+                        <DropdownMenuCheckboxItem
+                          key={status}
+                          checked={statusFilter.includes(status)}
+                          onCheckedChange={() => toggleStatusFilter(status)}
+                        >
+                          {status}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </div>
+                    
+                    <DropdownMenuSeparator />
+                    
+                    <div className="p-2">
+                      <p className="text-sm font-medium mb-2">Location</p>
+                      {locations.map(location => (
+                        <DropdownMenuCheckboxItem
+                          key={location}
+                          checked={locationFilter.includes(location)}
+                          onCheckedChange={() => toggleLocationFilter(location)}
+                        >
+                          {location}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </div>
+                    
+                    <DropdownMenuSeparator />
+                    
+                    <div className="p-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="w-full flex items-center justify-center"
+                        onClick={clearFilters}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Clear Filters
+                      </Button>
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                
+                <Button className="gap-1" asChild>
+                  <Link to="/add-supplier">
+                    <Plus className="h-4 w-4" />
+                    <span>Add Supplier</span>
+                  </Link>
                 </Button>
               </div>
             </div>
+            
+            {(categoryFilter.length > 0 || statusFilter.length > 0 || locationFilter.length > 0) && (
+              <div className="flex flex-wrap gap-2 items-center py-2">
+                <span className="text-sm text-muted-foreground">Active filters:</span>
+                
+                {categoryFilter.map(cat => (
+                  <Badge key={`cat-${cat}`} variant="outline" className="flex items-center gap-1">
+                    {cat}
+                    <button 
+                      onClick={() => toggleCategoryFilter(cat)}
+                      className="ml-1 rounded-full hover:bg-muted p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+                
+                {statusFilter.map(status => (
+                  <Badge key={`status-${status}`} variant="outline" className="flex items-center gap-1">
+                    {status}
+                    <button 
+                      onClick={() => toggleStatusFilter(status)}
+                      className="ml-1 rounded-full hover:bg-muted p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+                
+                {locationFilter.map(loc => (
+                  <Badge key={`loc-${loc}`} variant="outline" className="flex items-center gap-1">
+                    {loc}
+                    <button 
+                      onClick={() => toggleLocationFilter(loc)}
+                      className="ml-1 rounded-full hover:bg-muted p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+                
+                {(categoryFilter.length > 0 || statusFilter.length > 0 || locationFilter.length > 0) && (
+                  <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 px-2">
+                    Clear all
+                  </Button>
+                )}
+              </div>
+            )}
             
             <Card>
               <CardContent className="p-0">
