@@ -13,6 +13,7 @@ type AuthContextType = {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
 };
@@ -112,6 +113,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const signUp = async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      
+      let error;
+      let data;
+      
+      if (isMockClient) {
+        const result = await mockAuth.signUp(email, password);
+        error = result.error;
+        data = result.data;
+        
+        if (!error) {
+          // For mock, we don't auto-login after signup
+          toast({
+            title: "Sign up successful",
+            description: "Account created successfully. You can now log in.",
+          });
+        }
+      } else {
+        const { data: authData, error: authError } = await supabase.auth.signUp({ 
+          email, 
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/login`
+          }
+        });
+        error = authError;
+        data = authData;
+      }
+      
+      if (error) {
+        toast({
+          title: "Sign up failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
+
+      toast({
+        title: "Sign up successful",
+        description: "Please check your email to confirm your account",
+      });
+      
+      navigate('/login');
+    } catch (error) {
+      console.error('Error signing up:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const signOut = async () => {
     try {
       setLoading(true);
@@ -154,6 +209,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         session,
         loading,
         signIn,
+        signUp,
         signOut,
         isAuthenticated: !!user,
       }}

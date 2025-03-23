@@ -11,6 +11,7 @@ import SupplierDetails from "./pages/SupplierDetails";
 import VerificationProcesses from "./pages/VerificationProcesses";
 import AdminDashboard from "./pages/AdminDashboard";
 import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -29,6 +30,7 @@ const App = () => (
               <Route path="/supplier/:id" element={<SupplierDetails />} />
               <Route path="/verification" element={<VerificationProcesses />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
               
               {/* Protected Routes */}
               <Route element={<ProtectedRoute />}>

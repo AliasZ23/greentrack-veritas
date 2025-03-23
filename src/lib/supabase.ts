@@ -26,6 +26,16 @@ export const mockAuth = {
     }
     return { error: { message: 'Invalid login credentials' } };
   },
+  signUp: async (email: string, password: string) => {
+    // Mock successful sign up
+    if (email && password && password.length >= 6) {
+      return { 
+        data: { user: { email, id: Math.random().toString(36).substring(2, 15) } }, 
+        error: null 
+      };
+    }
+    return { data: null, error: { message: 'Invalid sign up credentials' } };
+  },
   signOut: async () => {
     return { error: null };
   },
