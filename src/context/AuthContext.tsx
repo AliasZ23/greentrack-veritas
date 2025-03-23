@@ -1,206 +1,32 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase, mockAuth } from '@/lib/supabase';
+import React, { createContext, useContext, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-
-// Check if we're using mock authentication
-const isMockClient = !import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-type AuthContextType = {
-  user: User | null;
-  session: Session | null;
-  loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
-  signOut: () => Promise<void>;
-  isAuthenticated: boolean;
-};
+import { AuthContextType } from './auth/types';
+import { useAuthState } from './auth/useAuthState';
+import { useAuthActions } from './auth/useAuthActions';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  // Extract auth state management
+  const { user: stateUser, session: stateSession, loading: stateLoading, setLoading, isAuthenticated } = useAuthState();
+  const [user, setUser] = useState<User | null>(stateUser);
+  const [session, setSession] = useState<Session | null>(stateSession);
+  const [loading, setLoadingState] = useState(stateLoading);
 
-  useEffect(() => {
-    const setData = async () => {
-      if (isMockClient) {
-        // For development, set a mock user after a delay to simulate loading
-        setTimeout(() => {
-          setUser({ email: 'admin@example.com', id: '1' } as User);
-          setSession({ user: { email: 'admin@example.com', id: '1' } as User } as Session);
-          setLoading(false);
-        }, 500);
-        return;
-      }
+  // Sync state from useAuthState
+  React.useEffect(() => {
+    setUser(stateUser);
+    setSession(stateSession);
+    setLoadingState(stateLoading);
+  }, [stateUser, stateSession, stateLoading]);
 
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error(error);
-        return;
-      }
-      
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    };
-
-    if (isMockClient) {
-      // Skip subscription for mock client
-      setData();
-    } else {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        (_event, session) => {
-          setSession(session);
-          setUser(session?.user ?? null);
-          setLoading(false);
-        }
-      );
-
-      setData();
-
-      return () => {
-        if (subscription) subscription.unsubscribe();
-      };
-    }
-  }, []);
-
-  const signIn = async (email: string, password: string) => {
-    try {
-      setLoading(true);
-      
-      let error;
-      
-      if (isMockClient) {
-        const result = await mockAuth.signIn(email, password);
-        error = result.error;
-        
-        if (!error) {
-          // Set mock user for development
-          setUser({ email, id: '1' } as User);
-          setSession({ user: { email, id: '1' } as User } as Session);
-        }
-      } else {
-        const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
-        error = authError;
-      }
-      
-      if (error) {
-        toast({
-          title: "Login failed",
-          description: error.message,
-          variant: "destructive",
-        });
-        throw error;
-      }
-
-      toast({
-        title: "Login successful",
-        description: "You have been logged in successfully",
-      });
-      
-      navigate('/admin');
-    } catch (error) {
-      console.error('Error signing in:', error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const signUp = async (email: string, password: string) => {
-    try {
-      setLoading(true);
-      
-      let error;
-      let data;
-      
-      if (isMockClient) {
-        const result = await mockAuth.signUp(email, password);
-        error = result.error;
-        data = result.data;
-        
-        if (!error) {
-          // For mock, we don't auto-login after signup
-          toast({
-            title: "Sign up successful",
-            description: "Account created successfully. You can now log in.",
-          });
-        }
-      } else {
-        const { data: authData, error: authError } = await supabase.auth.signUp({ 
-          email, 
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/login`
-          }
-        });
-        error = authError;
-        data = authData;
-      }
-      
-      if (error) {
-        toast({
-          title: "Sign up failed",
-          description: error.message,
-          variant: "destructive",
-        });
-        throw error;
-      }
-
-      toast({
-        title: "Sign up successful",
-        description: "Please check your email to confirm your account",
-      });
-      
-      navigate('/login');
-    } catch (error) {
-      console.error('Error signing up:', error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const signOut = async () => {
-    try {
-      setLoading(true);
-      
-      let error;
-      
-      if (isMockClient) {
-        const result = await mockAuth.signOut();
-        error = result.error;
-        
-        // Clear mock user data
-        setUser(null);
-        setSession(null);
-      } else {
-        const { error: authError } = await supabase.auth.signOut();
-        error = authError;
-      }
-      
-      if (error) {
-        toast({
-          title: "Sign out failed",
-          description: error.message,
-          variant: "destructive",
-        });
-        throw error;
-      }
-      
-      navigate('/login');
-    } catch (error) {
-      console.error('Error signing out:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Extract auth action handlers
+  const { signIn, signUp, signOut } = useAuthActions({
+    setLoading: setLoadingState,
+    setUser,
+    setSession
+  });
 
   return (
     <AuthContext.Provider
@@ -211,7 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signUp,
         signOut,
-        isAuthenticated: !!user,
+        isAuthenticated,
       }}
     >
       {children}
