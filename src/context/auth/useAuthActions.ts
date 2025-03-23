@@ -1,12 +1,8 @@
 
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { supabase, mockAuth } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { User, Session } from '@supabase/supabase-js';
-
-// Check if we're using mock authentication
-const isMockClient = !import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 type AuthStateProps = {
   setLoading: (loading: boolean) => void;
@@ -22,21 +18,7 @@ export function useAuthActions({ setLoading, setUser, setSession }: AuthStatePro
     try {
       setLoading(true);
       
-      let error;
-      
-      if (isMockClient) {
-        const result = await mockAuth.signIn(email, password);
-        error = result.error;
-        
-        if (!error) {
-          // Set mock user for development
-          setUser({ email, id: '1' } as User);
-          setSession({ user: { email, id: '1' } as User } as Session);
-        }
-      } else {
-        const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
-        error = authError;
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
         toast({
@@ -65,32 +47,13 @@ export function useAuthActions({ setLoading, setUser, setSession }: AuthStatePro
     try {
       setLoading(true);
       
-      let error;
-      let data;
-      
-      if (isMockClient) {
-        const result = await mockAuth.signUp(email, password);
-        error = result.error;
-        data = result.data;
-        
-        if (!error) {
-          // For mock, we don't auto-login after signup
-          toast({
-            title: "Sign up successful",
-            description: "Account created successfully. You can now log in.",
-          });
+      const { error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/login`
         }
-      } else {
-        const { data: authData, error: authError } = await supabase.auth.signUp({ 
-          email, 
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/login`
-          }
-        });
-        error = authError;
-        data = authData;
-      }
+      });
       
       if (error) {
         toast({
@@ -119,19 +82,7 @@ export function useAuthActions({ setLoading, setUser, setSession }: AuthStatePro
     try {
       setLoading(true);
       
-      let error;
-      
-      if (isMockClient) {
-        const result = await mockAuth.signOut();
-        error = result.error;
-        
-        // Clear mock user data
-        setUser(null);
-        setSession(null);
-      } else {
-        const { error: authError } = await supabase.auth.signOut();
-        error = authError;
-      }
+      const { error } = await supabase.auth.signOut();
       
       if (error) {
         toast({

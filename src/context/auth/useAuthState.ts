@@ -1,11 +1,9 @@
 
 import { useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
-import { supabase, mockAuth } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 
-// Check if we're using mock authentication
-const isMockClient = !import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY;
-
+// We no longer need mock authentication since we're using real Supabase credentials
 export function useAuthState() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -13,16 +11,6 @@ export function useAuthState() {
 
   useEffect(() => {
     const setData = async () => {
-      if (isMockClient) {
-        // For development, set a mock user after a delay to simulate loading
-        setTimeout(() => {
-          setUser({ email: 'admin@example.com', id: '1' } as User);
-          setSession({ user: { email: 'admin@example.com', id: '1' } as User } as Session);
-          setLoading(false);
-        }, 500);
-        return;
-      }
-
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) {
         console.error(error);
@@ -34,24 +22,20 @@ export function useAuthState() {
       setLoading(false);
     };
 
-    if (isMockClient) {
-      // Skip subscription for mock client
-      setData();
-    } else {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        (_event, session) => {
-          setSession(session);
-          setUser(session?.user ?? null);
-          setLoading(false);
-        }
-      );
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
 
-      setData();
+    setData();
 
-      return () => {
-        if (subscription) subscription.unsubscribe();
-      };
-    }
+    return () => {
+      if (subscription) subscription.unsubscribe();
+    };
   }, []);
 
   return {
