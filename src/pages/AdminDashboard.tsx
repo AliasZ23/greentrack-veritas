@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -49,7 +50,7 @@ import {
 import Header from '@/components/Header';
 import SustainabilityScore from '@/components/SustainabilityScore';
 import TransitionComponent from '@/components/TransitionComponent';
-import { suppliers, verificationActivities, performanceSummary } from '@/utils/mockData';
+import { suppliers, verificationActivities, performanceSummary, users, reports, tasks } from '@/utils/mockData';
 
 const AdminDashboard = () => {
   const [searchSuppliers, setSearchSuppliers] = useState('');

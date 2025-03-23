@@ -33,6 +33,30 @@ export interface VerificationActivity {
   type: 'audit' | 'certification' | 'report' | 'update';
 }
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  avatar?: string;
+}
+
+export interface Report {
+  id: string;
+  title: string;
+  date: string;
+  status: 'published' | 'draft';
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  priority: 'high' | 'medium' | 'low';
+  status: 'completed' | 'in-progress' | 'pending';
+  dueDate: string;
+  assignee: string;
+}
+
 // Sample suppliers
 export const suppliers: Supplier[] = [
   {
@@ -222,3 +246,120 @@ export const performanceSummary = {
   improvementAreas: ['Scope 3 Emissions', 'Supplier Diversity', 'Material Traceability'],
   recentMilestones: ['Achieved 75% renewable energy', 'Reduced water usage by 8%', 'Onboarded 12 new verified suppliers']
 };
+
+// Sample users
+export const users: User[] = [
+  {
+    id: '1',
+    name: 'Alex Johnson',
+    email: 'alex.johnson@example.com',
+    role: 'Admin',
+    avatar: 'https://i.pravatar.cc/150?u=1'
+  },
+  {
+    id: '2',
+    name: 'Sarah Williams',
+    email: 'sarah.williams@example.com',
+    role: 'Verifier',
+    avatar: 'https://i.pravatar.cc/150?u=2'
+  },
+  {
+    id: '3',
+    name: 'Michael Thompson',
+    email: 'michael.thompson@example.com',
+    role: 'Admin',
+    avatar: 'https://i.pravatar.cc/150?u=3'
+  },
+  {
+    id: '4',
+    name: 'Emma Davis',
+    email: 'emma.davis@example.com',
+    role: 'Verifier',
+    avatar: 'https://i.pravatar.cc/150?u=4'
+  },
+  {
+    id: '5',
+    name: 'David Wilson',
+    email: 'david.wilson@example.com',
+    role: 'Supplier Manager',
+    avatar: 'https://i.pravatar.cc/150?u=5'
+  }
+];
+
+// Sample reports
+export const reports: Report[] = [
+  {
+    id: '1',
+    title: 'Q4 Sustainability Report',
+    date: '2023-12-15',
+    status: 'published'
+  },
+  {
+    id: '2',
+    title: 'Carbon Footprint Analysis',
+    date: '2023-11-10',
+    status: 'published'
+  },
+  {
+    id: '3',
+    title: 'Supply Chain Ethics Review',
+    date: '2024-01-05',
+    status: 'draft'
+  },
+  {
+    id: '4',
+    title: 'Annual ESG Performance',
+    date: '2023-12-28',
+    status: 'draft'
+  },
+  {
+    id: '5',
+    title: 'Supplier Compliance Summary',
+    date: '2023-11-30',
+    status: 'published'
+  }
+];
+
+// Sample tasks
+export const tasks: Task[] = [
+  {
+    id: '1',
+    title: 'Complete Q1 Supplier Audits',
+    priority: 'high',
+    status: 'in-progress',
+    dueDate: 'Mar 31, 2024',
+    assignee: 'Sarah Williams'
+  },
+  {
+    id: '2',
+    title: 'Review New Supplier Applications',
+    priority: 'medium',
+    status: 'pending',
+    dueDate: 'Apr 15, 2024',
+    assignee: 'Michael Thompson'
+  },
+  {
+    id: '3',
+    title: 'Update Sustainability Metrics Dashboard',
+    priority: 'low',
+    status: 'completed',
+    dueDate: 'Mar 10, 2024',
+    assignee: 'Alex Johnson'
+  },
+  {
+    id: '4',
+    title: 'Prepare Monthly Compliance Report',
+    priority: 'high',
+    status: 'pending',
+    dueDate: 'Apr 05, 2024',
+    assignee: 'Emma Davis'
+  },
+  {
+    id: '5',
+    title: 'Conduct Supply Chain Risk Assessment',
+    priority: 'medium',
+    status: 'in-progress',
+    dueDate: 'Apr 20, 2024',
+    assignee: 'David Wilson'
+  }
+];
