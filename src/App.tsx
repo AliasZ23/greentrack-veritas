@@ -18,6 +18,7 @@ import AddSupplier from "./pages/AddSupplier";
 import Account from "./pages/Account";
 import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
+import Documents from "./pages/Documents";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/verification" element={<VerificationProcesses />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
+              <Route path="/documents" element={<Documents />} />
               
               {/* Protected Routes */}
               <Route element={<ProtectedRoute />}>
