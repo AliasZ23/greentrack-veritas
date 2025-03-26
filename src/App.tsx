@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -20,7 +20,16 @@ import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 import Documents from "./pages/Documents";
 
-const queryClient = new QueryClient();
+// Create a new query client with better error handling
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 30000,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -31,6 +40,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <Routes>
+              {/* Public Routes */}
               <Route path="/" element={<Index />} />
               <Route path="/supplier/:id" element={<SupplierDetails />} />
               <Route path="/verification" element={<VerificationProcesses />} />
@@ -47,7 +57,7 @@ const App = () => (
                 <Route path="/notifications" element={<Notifications />} />
               </Route>
               
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              {/* 404 Route - this will catch all unmatched routes */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>
