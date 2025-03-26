@@ -1,7 +1,7 @@
 
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { ArrowLeft, AlertTriangle } from "lucide-react";
+import { ArrowLeft, AlertTriangle, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const NotFound = () => {
@@ -29,11 +29,17 @@ const NotFound = () => {
         <p className="text-sm text-muted-foreground mb-8">
           Path: <code className="bg-muted px-2 py-1 rounded">{location.pathname}</code>
         </p>
-        <div className="flex justify-center">
-          <Button asChild>
+        <div className="flex justify-center gap-4">
+          <Button asChild variant="outline">
             <Link to="/">
+              <Home className="mr-2 h-4 w-4" />
+              Home
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link to="/" onClick={() => window.history.back()}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Return to Home
+              Go Back
             </Link>
           </Button>
         </div>

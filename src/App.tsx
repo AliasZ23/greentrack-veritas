@@ -35,7 +35,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <TooltipProvider>
-        <BrowserRouter>
+        <BrowserRouter basename="/">
           <AuthProvider>
             <Toaster />
             <Sonner />
@@ -56,6 +56,10 @@ const App = () => (
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/notifications" element={<Notifications />} />
               </Route>
+              
+              {/* Default redirect to home page if no route matches */}
+              <Route path="index" element={<Navigate to="/" replace />} />
+              <Route path="index.html" element={<Navigate to="/" replace />} />
               
               {/* 404 Route - this will catch all unmatched routes */}
               <Route path="*" element={<NotFound />} />
